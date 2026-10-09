@@ -274,7 +274,7 @@ public class CustomerGroup : MonoBehaviour
     public void FollowTo(Vector2 basePosition, Vector2 spacing)
     {
         for (int i = 0; i < Size; i++)
-            members[i].WalkTo(basePosition + spacing * (i + 1));
+            members[i].WalkToDirect(basePosition + spacing * (i + 1));
     }
 
     public void HideMembers()

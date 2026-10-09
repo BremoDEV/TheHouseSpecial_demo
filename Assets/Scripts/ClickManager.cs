@@ -48,7 +48,7 @@ public class ClickManager : MonoBehaviour
             Deselect();
 
         Vector2 worldPos = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Collider2D hit = Physics2D.OverlapPoint(worldPos);
+        Collider2D hit = PickCollider(worldPos);
 
         Interactable interactable = null;
         CustomerGroup group = hit != null ? hit.GetComponentInParent<CustomerGroup>() : null;
@@ -92,6 +92,22 @@ public class ClickManager : MonoBehaviour
             waitress.GoInteract(interactable);
         else if (allowFloorMovement)
             waitress.MoveTo(worldPos);
+    }
+
+    // Si hay varios colliders bajo el ratón (un plato encima de la barra, un cliente sobre su mesa),
+    // se prefiere: cliente > objeto clicable > cualquier otro (paredes, barra).
+    private static Collider2D PickCollider(Vector2 worldPos)
+    {
+        Collider2D[] hits = Physics2D.OverlapPointAll(worldPos);
+        Collider2D best = null;
+        int bestScore = -1;
+        foreach (Collider2D h in hits)
+        {
+            int score = h.GetComponentInParent<CustomerGroup>() != null ? 2
+                      : h.GetComponentInParent<Interactable>() != null ? 1 : 0;
+            if (score > bestScore) { best = h; bestScore = score; }
+        }
+        return best;
     }
 
     private void Select(CustomerGroup group)

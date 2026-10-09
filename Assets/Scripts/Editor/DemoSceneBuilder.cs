@@ -76,6 +76,7 @@ public static class DemoSceneBuilder
 
             EditorUtility.DisplayProgressBar("Montar escena demo", "Montando el restaurante...", 0.6f);
             BuildWorld(products, polloAsado, polloPlumas, counterItemPrefab, groupPrefab, productButtonPrefab);
+            AddCollisionsToScene();
 
             EditorUtility.DisplayProgressBar("Montar escena demo", "Guardando...", 0.9f);
             AssetDatabase.SaveAssets();
@@ -875,6 +876,87 @@ public static class DemoSceneBuilder
         SetArray(builtKitchen, "menu", menu.ToArray());
         SetSpecialVariant(builtKitchen, "Pájaro azul", pollo, plumas);
         EditorUtility.SetDirty(builtKitchen);
+    }
+
+    // ------------------------------------------------------------------ COLISIONES Y PAREDES
+
+    // Añade paredes, marca los obstáculos y crea la WalkGrid en la escena ABIERTA.
+    // Sirve para escenas ya montadas: no borra nada ni toca otros cambios.
+    [UnityEditor.MenuItem("Tools/The House Special/Añadir colisiones y paredes")]
+    public static void AddCollisionsMenu()
+    {
+        if (GameObject.Find("Suelo") == null)
+        {
+            EditorUtility.DisplayDialog("Añadir colisiones", "Abre primero la escena del restaurante (no encuentro el objeto 'Suelo').", "Vale");
+            return;
+        }
+        if (square == null) square = AssetDatabase.LoadAssetAtPath<Sprite>(SpritesFolder + "/Cuadrado.png");
+        if (spriteMaterial == null) LoadSpriteMaterial();
+
+        AddCollisionsToScene();
+        EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("¡Listo!",
+            "Paredes, colisiones y rejilla de caminos añadidas.\n\nGuarda la escena con Ctrl+S y dale a Play.", "Vale");
+    }
+
+    private static void AddCollisionsToScene()
+    {
+        var floor = GameObject.Find("Suelo");
+        if (floor == null) return;
+        Bounds b = floor.GetComponent<SpriteRenderer>().bounds;
+        const float wall = 0.3f;
+
+        // La barra larga no tenía collider: se lo ponemos para poder chocar con ella
+        var barra = GameObject.Find("Barra");
+        if (barra != null && barra.GetComponent<Collider2D>() == null) barra.AddComponent<BoxCollider2D>();
+
+        // Obstáculos: barra, barra de sucios, stand, trastero y todas las mesas
+        foreach (string n in new[] { "Barra", "Barra_Sucios", "Cartas", "Cubiertos", "TPV", "Trastero" })
+            MarkObstacle(GameObject.Find(n));
+        foreach (Table t in Object.FindObjectsByType<Table>())
+            MarkObstacle(t.gameObject);
+
+        // Paredes alrededor del suelo, con un hueco en la puerta (junto a la entrada)
+        var old = GameObject.Find("Paredes");
+        if (old != null) Object.DestroyImmediate(old);
+        var walls = new GameObject("Paredes");
+        float doorY = -4.5f;
+        var entrance = GameObject.Find("Entrance");
+        if (entrance != null) doorY = entrance.transform.position.y;
+        const float doorHalf = 0.8f;
+
+        Wall(walls.transform, "Pared_Arriba", new Vector2(b.center.x, b.max.y - wall / 2f), new Vector2(b.size.x, wall));
+        Wall(walls.transform, "Pared_Abajo", new Vector2(b.center.x, b.min.y + wall / 2f), new Vector2(b.size.x, wall));
+        Wall(walls.transform, "Pared_Derecha", new Vector2(b.max.x - wall / 2f, b.center.y), new Vector2(wall, b.size.y));
+        float lowTop = doorY - doorHalf, highBottom = doorY + doorHalf;
+        if (lowTop > b.min.y)
+            Wall(walls.transform, "Pared_Izquierda_Abajo", new Vector2(b.min.x + wall / 2f, (b.min.y + lowTop) / 2f), new Vector2(wall, lowTop - b.min.y));
+        if (highBottom < b.max.y)
+            Wall(walls.transform, "Pared_Izquierda_Arriba", new Vector2(b.min.x + wall / 2f, (highBottom + b.max.y) / 2f), new Vector2(wall, b.max.y - highBottom));
+
+        // Rejilla de caminos: el suelo menos el grosor de las paredes
+        var oldGrid = GameObject.Find("WalkGrid");
+        if (oldGrid != null) Object.DestroyImmediate(oldGrid);
+        var gridGo = new GameObject("WalkGrid");
+        var grid = gridGo.AddComponent<WalkGrid>();
+        var so = new SerializedObject(grid);
+        so.FindProperty("areaMin").vector2Value = new Vector2(b.min.x + wall, b.min.y + wall);
+        so.FindProperty("areaMax").vector2Value = new Vector2(b.max.x - wall, b.max.y - wall);
+        so.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    private static void MarkObstacle(GameObject go)
+    {
+        if (go == null) return;
+        if (go.GetComponent<NavObstacle>() == null) go.AddComponent<NavObstacle>();
+    }
+
+    private static void Wall(Transform parent, string name, Vector2 center, Vector2 size)
+    {
+        var go = Obj(name, parent, center, new Vector3(size.x, size.y, 1f));
+        AddSprite(go, square, new Color(0.35f, 0.24f, 0.18f), -50);
+        go.AddComponent<BoxCollider2D>();
+        go.AddComponent<NavObstacle>();
     }
 
     private static void AddSceneToBuild()

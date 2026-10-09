@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -43,7 +44,7 @@ public class Customer : MonoBehaviour
     [Header("Movimiento (editable por diseño)")]
     [SerializeField] private float walkSpeed = 3f;
 
-    private Vector2 target;
+    private readonly List<Vector2> path = new List<Vector2>();
     private bool hasTarget;
 
     public bool IsWalking => hasTarget;
@@ -103,15 +104,29 @@ public class Customer : MonoBehaviour
         if (selectionMarker != null) selectionMarker.SetActive(selected);
     }
 
+    // Camina rodeando obstáculos (si hay WalkGrid)
     public void WalkTo(Vector2 destination)
     {
-        target = destination;
+        path.Clear();
+        if (WalkGrid.Instance != null)
+            path.AddRange(WalkGrid.Instance.FindPath(transform.position, destination, true));
+        else
+            path.Add(destination);
+        hasTarget = path.Count > 0;
+    }
+
+    // Camina en línea recta (para seguir a la camarera, que ya esquiva los obstáculos)
+    public void WalkToDirect(Vector2 destination)
+    {
+        path.Clear();
+        path.Add(destination);
         hasTarget = true;
     }
 
     public void StopWalking()
     {
         hasTarget = false;
+        path.Clear();
     }
 
     private void Update()
@@ -119,9 +134,13 @@ public class Customer : MonoBehaviour
         if (!hasTarget) return;
 
         float dt = IgnoreFreeze ? Time.deltaTime : GameTime.Delta;
+        Vector2 target = path[0];
         transform.position = Vector2.MoveTowards(transform.position, target, walkSpeed * dt);
 
         if (((Vector2)transform.position - target).sqrMagnitude < 0.0001f)
-            hasTarget = false;
+        {
+            path.RemoveAt(0);
+            if (path.Count == 0) hasTarget = false;
+        }
     }
 }
