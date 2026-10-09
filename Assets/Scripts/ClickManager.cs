@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 // Detecta los clics del ratón y decide qué pasa:
 // - Clic en un grupo de la cola -> lo selecciona (la camarera no se mueve).
 // - Con un grupo seleccionado, clic en una mesa limpia y vacía -> se sientan solos.
-// - Clic en un cliente sentado -> cuenta como clic en su mesa.
+// - Clic en un cliente sentado (o en su bocadillo: ¡PEDIR!, CARTA, CUENTA, pedido) -> cuenta como clic en su mesa.
 // - Clic en algo interactuable -> la camarera va y lo usa.
 // - Clic en el suelo -> la camarera camina (y se cancela la selección).
 // No hace nada si el juego está en pausa o la camarera se está llevando a alguien.

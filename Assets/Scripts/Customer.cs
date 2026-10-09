@@ -53,6 +53,26 @@ public class Customer : MonoBehaviour
     // Si es true, camina aunque el tiempo del juego esté congelado (cuando la camarera se lo lleva)
     public bool IgnoreFreeze { get; set; }
 
+    private void Awake()
+    {
+        // Los bocadillos también se pueden clicar: cuentan como clic en el cliente,
+        // y el ClickManager convierte "clic en cliente sentado" en "clic en su mesa".
+        MakeClickable(alertBubble);
+        MakeClickable(orderBubble);
+    }
+
+    // Pone un collider a cada dibujo del bocadillo (fondo e icono) para que el ratón lo detecte
+    private static void MakeClickable(GameObject bubble)
+    {
+        if (bubble == null) return;
+        foreach (SpriteRenderer sr in bubble.GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            if (sr.GetComponent<Collider2D>() != null) continue;
+            BoxCollider2D col = sr.gameObject.AddComponent<BoxCollider2D>(); // se ajusta solo al tamaño del sprite
+            col.isTrigger = true; // no empuja ni choca con nada, solo sirve para el clic
+        }
+    }
+
     public void SetLook(CustomerLook look)
     {
         if (look == null) return;
