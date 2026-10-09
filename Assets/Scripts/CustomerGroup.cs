@@ -88,7 +88,7 @@ public class CustomerGroup : MonoBehaviour
     [SerializeField] private Sprite menuAlertIcon;
     [SerializeField] private Color menuAlertColor = new Color(0.9f, 0.6f, 0.2f);
     [SerializeField] private Sprite billAlertIcon;
-    [SerializeField] private Color billAlertColor = new Color(0.3f, 0.8f, 0.3f);
+    [SerializeField] private Color billAlertColor = new Color(0.25f, 0.5f, 0.95f); // azul, como el botón Cuenta del TPV
 
     [Header("Colores de la cara")]
     [SerializeField] private Color happyColor = new Color(0.4f, 0.85f, 0.4f);

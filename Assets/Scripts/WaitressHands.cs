@@ -44,7 +44,7 @@ public class WaitressHands : MonoBehaviour
     [SerializeField] private Sprite cutleryIcon;
     [SerializeField] private Color cutleryColor = new Color(0.75f, 0.75f, 0.8f);
     [SerializeField] private Sprite billIcon;
-    [SerializeField] private Color billColor = new Color(0.3f, 0.8f, 0.3f);
+    [SerializeField] private Color billColor = new Color(0.25f, 0.5f, 0.95f);
     [SerializeField] private Sprite dirtyDishesIcon;
     [SerializeField] private Color dirtyDishesColor = new Color(0.45f, 0.35f, 0.25f);
 

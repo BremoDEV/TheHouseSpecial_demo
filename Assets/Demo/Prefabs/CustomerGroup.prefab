@@ -1796,7 +1796,7 @@ MonoBehaviour:
   menuAlertIcon: {fileID: 0}
   menuAlertColor: {r: 0.9, g: 0.6, b: 0.2, a: 1}
   billAlertIcon: {fileID: 0}
-  billAlertColor: {r: 0.3, g: 0.8, b: 0.3, a: 1}
+  billAlertColor: {r: 0.25, g: 0.5, b: 0.95, a: 1}
   happyColor: {r: 0.4, g: 0.85, b: 0.4, a: 1}
   annoyedColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   angryColor: {r: 0.95, g: 0.25, b: 0.2, a: 1}

@@ -77,6 +77,7 @@ public static class DemoSceneBuilder
             EditorUtility.DisplayProgressBar("Montar escena demo", "Montando el restaurante...", 0.6f);
             BuildWorld(products, polloAsado, polloPlumas, counterItemPrefab, groupPrefab, productButtonPrefab);
             AddCollisionsToScene();
+            UpdateTpvPanelInScene();
 
             EditorUtility.DisplayProgressBar("Montar escena demo", "Guardando...", 0.9f);
             AssetDatabase.SaveAssets();
@@ -957,6 +958,92 @@ public static class DemoSceneBuilder
         AddSprite(go, square, new Color(0.35f, 0.24f, 0.18f), -50);
         go.AddComponent<BoxCollider2D>();
         go.AddComponent<NavObstacle>();
+    }
+
+    // ------------------------------------------------------------------ PANEL DEL TPV (versión con comanda)
+
+    private static readonly Color TpvGreen = new Color(0.25f, 0.65f, 0.3f);
+    private static readonly Color TpvBlue = new Color(0.25f, 0.5f, 0.95f);
+    private static readonly Color TpvRed = new Color(0.75f, 0.2f, 0.2f);
+    private static readonly Color TpvGrey = new Color(0.4f, 0.4f, 0.45f);
+
+    // Rehace los botones del panel del TPV en la escena ABIERTA (Pedir, Cuenta, Borrar, X),
+    // lo hace más translúcido y pone en azul el aviso de cuenta del cliente.
+    [UnityEditor.MenuItem("Tools/The House Special/Actualizar panel del TPV")]
+    public static void UpdateTpvPanelMenu()
+    {
+        if (Object.FindObjectsByType<TpvPanel>().Length == 0)
+        {
+            EditorUtility.DisplayDialog("Actualizar TPV", "Abre primero la escena del restaurante (no encuentro el TpvPanel).", "Vale");
+            return;
+        }
+        uiLayer = LayerMask.NameToLayer("UI");
+        UpdateTpvPanelInScene();
+        EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("¡Listo!", "Panel del TPV actualizado.\n\nGuarda la escena con Ctrl+S y dale a Play.", "Vale");
+    }
+
+    private static void UpdateTpvPanelInScene()
+    {
+        TpvPanel[] panels = Object.FindObjectsByType<TpvPanel>();
+        if (panels.Length == 0) return;
+        TpvPanel tpv = panels[0];
+
+        var so = new SerializedObject(tpv);
+        var root = so.FindProperty("root").objectReferenceValue as GameObject;
+        if (root == null) return;
+        Transform r = root.transform;
+        var center = new Vector2(0.5f, 0.5f);
+
+        // Fondo más translúcido
+        var bg = root.GetComponent<Image>();
+        if (bg != null) bg.color = new Color(0.08f, 0.08f, 0.12f, 0.72f);
+
+        // Fuera los botones viejos (y los nuevos si ya se había actualizado antes)
+        foreach (string n in new[] { "BtnCuenta", "BtnCerrar", "BtnPedir", "BtnBorrar", "Comanda" })
+        {
+            Transform old = r.Find(n);
+            if (old != null) Object.DestroyImmediate(old.gameObject);
+        }
+
+        var selection = MakeText("Comanda", r, "Pulsa los productos para apuntarlos en la comanda", 30f, Color.white);
+        Place(selection.gameObject, center, new Vector2(0f, -105f), new Vector2(840f, 60f));
+
+        var bill = MakeButton("BtnCuenta", r, "Cuenta", center, new Vector2(-300f, -215f), new Vector2(200f, 70f), TpvBlue, 30f);
+        var clear = MakeButton("BtnBorrar", r, "Borrar", center, new Vector2(-70f, -215f), new Vector2(160f, 70f), TpvGrey, 28f);
+        var order = MakeButton("BtnPedir", r, "Pedir", center, new Vector2(225f, -215f), new Vector2(320f, 90f), TpvGreen, 42f);
+        var close = MakeButton("BtnCerrar", r, "X", new Vector2(1f, 1f), new Vector2(-45f, -45f), new Vector2(70f, 70f), TpvRed, 40f);
+
+        so.FindProperty("billButton").objectReferenceValue = bill;
+        so.FindProperty("closeButton").objectReferenceValue = close;
+        so.FindProperty("orderButton").objectReferenceValue = order;
+        so.FindProperty("clearButton").objectReferenceValue = clear;
+        so.FindProperty("selectionText").objectReferenceValue = selection;
+        so.ApplyModifiedPropertiesWithoutUndo();
+
+        // Cuenta en azul también en la mano de la camarera
+        foreach (WaitressHands hands in Object.FindObjectsByType<WaitressHands>())
+        {
+            var hso = new SerializedObject(hands);
+            hso.FindProperty("billColor").colorValue = TpvBlue;
+            hso.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        // Y en el aviso de cuenta de los clientes (prefab)
+        string prefabPath = PrefabsFolder + "/CustomerGroup.prefab";
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath) != null)
+        {
+            GameObject contents = PrefabUtility.LoadPrefabContents(prefabPath);
+            var group = contents.GetComponent<CustomerGroup>();
+            if (group != null)
+            {
+                var gso = new SerializedObject(group);
+                gso.FindProperty("billAlertColor").colorValue = TpvBlue;
+                gso.ApplyModifiedPropertiesWithoutUndo();
+                PrefabUtility.SaveAsPrefabAsset(contents, prefabPath);
+            }
+            PrefabUtility.UnloadPrefabContents(contents);
+        }
     }
 
     private static void AddSceneToBuild()
