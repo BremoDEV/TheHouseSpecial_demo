@@ -344,7 +344,7 @@ public static class DemoSceneBuilder
         CounterItem counterItemPrefab, CustomerGroup groupPrefab, Button productButtonPrefab)
     {
         // --- Barra en L: parte larga (cocina) ---
-        var barra = Obj("Barra", null, new Vector3(1f, 3.9f, 0f), new Vector3(8.6f, 0.8f, 1f));
+        var barra = Obj("Barra", null, BarraPos, BarraScale);
         AddSprite(barra, square, new Color(0.55f, 0.35f, 0.2f), 0);
 
         var kitchenGo = new GameObject("Kitchen");
@@ -410,13 +410,14 @@ public static class DemoSceneBuilder
         Set(cartasSource, "interactionPoint", Point("IP_Cartas", null, new Vector3(8.2f, 1.4f, 0f)));
         Label("CARTAS", new Vector3(9.2f, 2.0f, 0f));
 
-        var cubiertos = Obj("Cubiertos", null, new Vector3(9.2f, 0.2f, 0f), new Vector3(0.7f, 0.7f, 1f));
-        AddSprite(cubiertos, square, new Color(0.75f, 0.75f, 0.8f), 0);
+        // Cubiertos: en la punta izquierda de la barra larga
+        var cubiertos = Obj("Cubiertos", null, CubiertosPos, CubiertosScale);
+        AddSprite(cubiertos, square, new Color(0.75f, 0.75f, 0.8f), 1);
         cubiertos.AddComponent<BoxCollider2D>();
         var cubiertosSource = cubiertos.AddComponent<ItemSource>();
         Set(cubiertosSource, "itemType", (int)HeldItemType.Cutlery);
-        Set(cubiertosSource, "interactionPoint", Point("IP_Cubiertos", null, new Vector3(8.2f, 0.2f, 0f)));
-        Label("CUBIERTOS", new Vector3(9.2f, 0.8f, 0f));
+        Set(cubiertosSource, "interactionPoint", Point("IP_Cubiertos", null, CubiertosIP));
+        Label("CUBIERTOS", CubiertosLabelPos);
 
         var tpvGo = Obj("TPV", null, new Vector3(9.2f, -1.1f, 0f), new Vector3(0.9f, 0.7f, 1f));
         AddSprite(tpvGo, square, new Color(0.15f, 0.15f, 0.2f), 0);
@@ -958,6 +959,49 @@ public static class DemoSceneBuilder
         AddSprite(go, square, new Color(0.35f, 0.24f, 0.18f), -50);
         go.AddComponent<BoxCollider2D>();
         go.AddComponent<NavObstacle>();
+    }
+
+    // ------------------------------------------------------------------ CUBIERTOS EN LA BARRA
+
+    // La barra se alarga por la izquierda y los cubiertos van en esa punta,
+    // así no se quita ningún hueco de platos y bebidas.
+    private static readonly Vector3 BarraPos = new Vector3(0.4f, 3.9f, 0f);
+    private static readonly Vector3 BarraScale = new Vector3(9.8f, 0.8f, 1f);
+    private static readonly Vector3 CubiertosPos = new Vector3(-3.85f, 3.9f, 0f);
+    private static readonly Vector3 CubiertosScale = new Vector3(0.6f, 0.6f, 1f);
+    private static readonly Vector3 CubiertosIP = new Vector3(-3.85f, 2.95f, 0f);
+    private static readonly Vector3 CubiertosLabelPos = new Vector3(-3.85f, 4.55f, 0f);
+
+    // Mueve los cubiertos a la barra en la escena ABIERTA, sin tocar nada más
+    [UnityEditor.MenuItem("Tools/The House Special/Mover cubiertos a la barra")]
+    public static void MoveCutleryMenu()
+    {
+        var barra = GameObject.Find("Barra");
+        var cubiertos = GameObject.Find("Cubiertos");
+        if (barra == null || cubiertos == null)
+        {
+            EditorUtility.DisplayDialog("Mover cubiertos", "Abre primero la escena del restaurante (no encuentro 'Barra' o 'Cubiertos').", "Vale");
+            return;
+        }
+
+        Undo.RecordObject(barra.transform, "Mover cubiertos");
+        barra.transform.position = BarraPos;
+        barra.transform.localScale = BarraScale;
+
+        Undo.RecordObject(cubiertos.transform, "Mover cubiertos");
+        cubiertos.transform.position = CubiertosPos;
+        cubiertos.transform.localScale = CubiertosScale;
+        var sr = cubiertos.GetComponent<SpriteRenderer>();
+        if (sr != null) { Undo.RecordObject(sr, "Mover cubiertos"); sr.sortingOrder = 1; } // por encima de la barra
+
+        var ip = GameObject.Find("IP_Cubiertos");
+        if (ip != null) { Undo.RecordObject(ip.transform, "Mover cubiertos"); ip.transform.position = CubiertosIP; }
+
+        var label = GameObject.Find("Etiqueta_CUBIERTOS");
+        if (label != null) { Undo.RecordObject(label.transform, "Mover cubiertos"); label.transform.position = CubiertosLabelPos; }
+
+        EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("¡Listo!", "Cubiertos movidos a la punta izquierda de la barra.\n\nGuarda la escena con Ctrl+S y dale a Play.", "Vale");
     }
 
     // ------------------------------------------------------------------ PANEL DEL TPV (versión con comanda)
