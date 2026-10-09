@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfefd526e6017a645bf03897addc41e3, type: 3}
+  m_Name: Pollo con plumas azules
+  m_EditorClassIdentifier: Assembly-CSharp::MenuItem
+  displayName: Pollo con plumas azules
+  category: 1
+  icon: {fileID: 0}
+  placeholderColor: {r: 0.3, g: 0.45, b: 0.95, a: 1}
+  replaces: {fileID: 11400000, guid: c236ff304f46d244a82ac5068ce502b4, type: 2}
+  priceMultiplier: 1.5
