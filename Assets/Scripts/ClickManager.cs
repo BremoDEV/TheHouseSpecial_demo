@@ -21,6 +21,9 @@ public class ClickManager : MonoBehaviour
     [Tooltip("Si está activo, hacer clic en el suelo vacío mueve a la camarera")]
     [SerializeField] private bool allowFloorMovement = true;
 
+    [Tooltip("Margen del clic en unidades: si no aciertas justo, se coge lo clicable más cercano dentro de este radio")]
+    [SerializeField] private float clickTolerance = 0.5f;
+
     private CustomerGroup selectedGroup;
 
     private void Awake()
@@ -94,20 +97,36 @@ public class ClickManager : MonoBehaviour
             waitress.MoveTo(worldPos);
     }
 
-    // Si hay varios colliders bajo el ratón (un plato encima de la barra, un cliente sobre su mesa),
-    // se prefiere: cliente > objeto clicable > cualquier otro (paredes, barra).
-    private static Collider2D PickCollider(Vector2 worldPos)
+    // Elige qué se ha clicado, con margen de error:
+    // 1) Busca todo lo que haya en un círculo alrededor del ratón (radio = clickTolerance).
+    // 2) Entre los clientes y objetos clicables, se queda con el MÁS CERCANO al ratón
+    //    (si dos están igual de cerca, gana el cliente).
+    // 3) Si no hay nada clicable cerca, devuelve lo que haya justo debajo (pared, barra) o nada (suelo).
+    private Collider2D PickCollider(Vector2 worldPos)
     {
-        Collider2D[] hits = Physics2D.OverlapPointAll(worldPos);
         Collider2D best = null;
-        int bestScore = -1;
-        foreach (Collider2D h in hits)
+        float bestDistance = float.MaxValue;
+        int bestScore = 0;
+
+        foreach (Collider2D h in Physics2D.OverlapCircleAll(worldPos, clickTolerance))
         {
             int score = h.GetComponentInParent<CustomerGroup>() != null ? 2
                       : h.GetComponentInParent<Interactable>() != null ? 1 : 0;
-            if (score > bestScore) { best = h; bestScore = score; }
+            if (score == 0) continue;
+
+            // 0 si el ratón está dentro del collider; si no, la distancia hasta su borde
+            float distance = Vector2.Distance(h.ClosestPoint(worldPos), worldPos);
+            bool closer = distance < bestDistance - 0.01f;
+            bool tieButBetter = Mathf.Abs(distance - bestDistance) <= 0.01f && score > bestScore;
+            if (closer || tieButBetter)
+            {
+                best = h;
+                bestDistance = distance;
+                bestScore = score;
+            }
         }
-        return best;
+
+        return best != null ? best : Physics2D.OverlapPoint(worldPos);
     }
 
     private void Select(CustomerGroup group)
