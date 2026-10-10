@@ -103,6 +103,15 @@ public class CustomerGroup : MonoBehaviour
     public bool HasConsumedSomething { get; private set; }
     public float PatienceNormalized => phaseDuration > 0f ? patienceLeft / phaseDuration : 1f;
     public bool CanBeTaken => State != GroupState.BeingTaken;
+    public bool IsSelected { get; private set; }
+
+    // Para el tutorial: si es true, la paciencia no baja (la cara se queda verde)
+    public bool PatiencePaused { get; set; }
+    // Para el tutorial: true = tras beber piden la carta, false = la cuenta, null = al azar
+    public bool? ForcedFoodChoice { get; set; }
+
+    // El primer cliente del grupo (para señalarlo con la flecha del tutorial)
+    public Transform Anchor => Size > 0 ? members[0].transform : transform;
 
     // Posición del grupo (la del primer cliente)
     public Vector2 Position =>
@@ -183,6 +192,7 @@ public class CustomerGroup : MonoBehaviour
 
     public void SetSelected(bool selected)
     {
+        IsSelected = selected;
         for (int i = 0; i < Size; i++) members[i].SetSelected(selected);
     }
 
@@ -305,7 +315,7 @@ public class CustomerGroup : MonoBehaviour
                 {
                     // Si el restaurante ya ha cerrado, no piden comida: piden la cuenta
                     bool closed = DayManager.Instance != null && DayManager.Instance.IsClosed;
-                    bool wantsFood = !closed && Random.value < chanceToOrderFood;
+                    bool wantsFood = ForcedFoodChoice ?? (!closed && Random.value < chanceToOrderFood);
                     EnterState(wantsFood ? GroupState.WantsMenu : GroupState.WantsBill);
                 }
                 break;
@@ -462,6 +472,7 @@ public class CustomerGroup : MonoBehaviour
 
     private void Drain()
     {
+        if (PatiencePaused) return;
         patienceLeft -= GameTime.Delta;
         UpdateMood();
 

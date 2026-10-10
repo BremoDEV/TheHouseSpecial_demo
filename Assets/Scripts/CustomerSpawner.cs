@@ -78,10 +78,29 @@ public class CustomerSpawner : MonoBehaviour
             for (int i = 0; i < size; i++)
                 chosen[i] = looks[Random.Range(0, looks.Length)];
 
+        CreateGroup(size, chosen);
+    }
+
+    // Para el tutorial: crea YA un grupo concreto (tamaño y tipo de cliente por su nombre, p. ej. "Gato")
+    public CustomerGroup SpawnNow(int size, string typeName)
+    {
+        CustomerLook look = null;
+        if (looks != null)
+            foreach (CustomerLook l in looks)
+                if (l != null && l.typeName == typeName) look = l;
+
+        CustomerLook[] chosen = new CustomerLook[size];
+        for (int i = 0; i < size; i++) chosen[i] = look;
+        return CreateGroup(size, chosen);
+    }
+
+    private CustomerGroup CreateGroup(int size, CustomerLook[] chosen)
+    {
         CustomerGroup group = Instantiate(groupPrefab, entrancePoint.position, Quaternion.identity);
         spawnedCount++;
         group.name = $"Grupo_{spawnedCount}";
         group.Init(size, chosen, queue, exitPoint.position);
         queue.TryAdd(group);
+        return group;
     }
 }

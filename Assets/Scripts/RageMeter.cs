@@ -23,6 +23,9 @@ public class RageMeter : MonoBehaviour
     [Tooltip("Se dispara cuando la barra se llena (aquí conectaremos el trastero)")]
     public UnityEvent onRageFull;
 
+    // Para el tutorial: mientras sea true, AddRage no hace nada (SetRage y ReduceRage sí funcionan)
+    public bool IgnoreRage { get; set; }
+
     public float Current => currentRage;
     public float Normalized => currentRage / maxRage;
     public bool IsFull => currentRage >= maxRage;
@@ -43,7 +46,7 @@ public class RageMeter : MonoBehaviour
 
     public void AddRage(float amount, CustomerGroup source = null)
     {
-        if (amount <= 0f || IsFull) return;
+        if (amount <= 0f || IsFull || IgnoreRage) return;
 
         currentRage = Mathf.Min(maxRage, currentRage + amount);
         if (source != null) LastRageSource = source;

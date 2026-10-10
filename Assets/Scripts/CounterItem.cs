@@ -17,6 +17,9 @@ public class CounterItem : Interactable
     [Tooltip("OPCIÓN B (más fácil): un sprite rectangular hijo que se va encogiendo")]
     [SerializeField] private Transform timerBar;
 
+    // Para el tutorial: mientras sea true, nada se pone malo en la barra
+    public static bool SpoilPaused { get; set; }
+
     private MenuItem item;
     private Kitchen kitchen;
     private int slot;
@@ -51,6 +54,7 @@ public class CounterItem : Interactable
 
     private void Update()
     {
+        if (SpoilPaused) return;
         timeLeft -= GameTime.Delta;
         UpdateTimerVisual();
 

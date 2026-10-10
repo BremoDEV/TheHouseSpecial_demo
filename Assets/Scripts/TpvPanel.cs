@@ -35,6 +35,8 @@ public class TpvPanel : MonoBehaviour
 
     private bool UsesOrderTicket => orderButton != null;
 
+    public bool IsOpen => root != null && root.activeSelf;
+
     private void Start()
     {
         BuildButtons();

@@ -14,7 +14,7 @@ using UnityEngine.UI;
 // Crea (o reemplaza) la carpeta Assets/Demo con: sprites básicos, los 9 productos,
 // los prefabs (cliente, producto en barra, botón del TPV) y la escena Demo_Restaurante.
 // No toca tus otras escenas ni carpetas.
-public static class DemoSceneBuilder
+public static partial class DemoSceneBuilder
 {
     private const string Root = "Assets/Demo";
     private const string SpritesFolder = Root + "/Sprites";
@@ -132,7 +132,11 @@ public static class DemoSceneBuilder
 
     private static Sprite MakeSprite(string name, int w, int h, System.Func<int, int, float> alpha)
     {
-        string assetPath = SpritesFolder + "/" + name + ".png";
+        return MakeSpriteAt(SpritesFolder + "/" + name + ".png", w, h, alpha);
+    }
+
+    private static Sprite MakeSpriteAt(string assetPath, int w, int h, System.Func<int, int, float> alpha)
+    {
         var tex = new Texture2D(w, h, TextureFormat.RGBA32, false);
         var pixels = new Color32[w * h];
         for (int y = 0; y < h; y++)
@@ -1094,7 +1098,10 @@ public static class DemoSceneBuilder
     {
         var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
         scenes.RemoveAll(s => s.path == ScenePath);
-        scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
+        // Si ya existe el menú principal, la partida va después del menú y del tutorial
+        int index = scenes.FindIndex(s => s.path == TutorialScenePath);
+        if (index < 0) index = scenes.FindIndex(s => s.path == MenuScenePath);
+        scenes.Insert(index + 1, new EditorBuildSettingsScene(ScenePath, true));
         EditorBuildSettings.scenes = scenes.ToArray();
     }
 }
