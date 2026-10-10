@@ -136,8 +136,8 @@ public static partial class DemoSceneBuilder
 
         var continueButton = MakeButton("BtnContinuar", panel.transform, "Continuar", new Vector2(1f, 0.5f),
             new Vector2(-135f, 0f), new Vector2(230f, 90f), new Color(0.25f, 0.65f, 0.3f), 34f);
-        var skipButton = MakeButton("BtnSaltarTutorial", canvas, "Saltar tutorial >>", new Vector2(1f, 1f),
-            new Vector2(-190f, -125f), new Vector2(320f, 64f), new Color(0.35f, 0.35f, 0.42f), 30f);
+        var skipButton = MakeButton("BtnSaltarTutorial", canvas, "Saltar tutorial >>", new Vector2(0.5f, 1f),
+            new Vector2(250f, -50f), new Vector2(300f, 60f), new Color(0.35f, 0.35f, 0.42f), 30f);
 
         // Que se dibujen debajo de la pantalla en negro y de la pausa
         var blackout = canvas.Find("PanelNegro");

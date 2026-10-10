@@ -76,7 +76,7 @@ public static partial class DemoSceneBuilder
 
             EditorUtility.DisplayProgressBar("Montar escena demo", "Montando el restaurante...", 0.6f);
             BuildWorld(products, polloAsado, polloPlumas, counterItemPrefab, groupPrefab, productButtonPrefab);
-            AddCollisionsToScene();
+            ApplyLayoutToScene(); // coloca todo según el esquema nuevo (incluye paredes y colisiones)
             UpdateTpvPanelInScene();
 
             EditorUtility.DisplayProgressBar("Montar escena demo", "Guardando...", 0.9f);
@@ -909,8 +909,6 @@ public static partial class DemoSceneBuilder
     {
         var floor = GameObject.Find("Suelo");
         if (floor == null) return;
-        Bounds b = floor.GetComponent<SpriteRenderer>().bounds;
-        const float wall = 0.3f;
 
         // La barra larga no tenía collider: se lo ponemos para poder chocar con ella
         var barra = GameObject.Find("Barra");
@@ -922,33 +920,8 @@ public static partial class DemoSceneBuilder
         foreach (Table t in Object.FindObjectsByType<Table>())
             MarkObstacle(t.gameObject);
 
-        // Paredes alrededor del suelo, con un hueco en la puerta (junto a la entrada)
-        var old = GameObject.Find("Paredes");
-        if (old != null) Object.DestroyImmediate(old);
-        var walls = new GameObject("Paredes");
-        float doorY = -4.5f;
-        var entrance = GameObject.Find("Entrance");
-        if (entrance != null) doorY = entrance.transform.position.y;
-        const float doorHalf = 0.8f;
-
-        Wall(walls.transform, "Pared_Arriba", new Vector2(b.center.x, b.max.y - wall / 2f), new Vector2(b.size.x, wall));
-        Wall(walls.transform, "Pared_Abajo", new Vector2(b.center.x, b.min.y + wall / 2f), new Vector2(b.size.x, wall));
-        Wall(walls.transform, "Pared_Derecha", new Vector2(b.max.x - wall / 2f, b.center.y), new Vector2(wall, b.size.y));
-        float lowTop = doorY - doorHalf, highBottom = doorY + doorHalf;
-        if (lowTop > b.min.y)
-            Wall(walls.transform, "Pared_Izquierda_Abajo", new Vector2(b.min.x + wall / 2f, (b.min.y + lowTop) / 2f), new Vector2(wall, lowTop - b.min.y));
-        if (highBottom < b.max.y)
-            Wall(walls.transform, "Pared_Izquierda_Arriba", new Vector2(b.min.x + wall / 2f, (highBottom + b.max.y) / 2f), new Vector2(wall, b.max.y - highBottom));
-
-        // Rejilla de caminos: el suelo menos el grosor de las paredes
-        var oldGrid = GameObject.Find("WalkGrid");
-        if (oldGrid != null) Object.DestroyImmediate(oldGrid);
-        var gridGo = new GameObject("WalkGrid");
-        var grid = gridGo.AddComponent<WalkGrid>();
-        var so = new SerializedObject(grid);
-        so.FindProperty("areaMin").vector2Value = new Vector2(b.min.x + wall, b.min.y + wall);
-        so.FindProperty("areaMax").vector2Value = new Vector2(b.max.x - wall, b.max.y - wall);
-        so.ApplyModifiedPropertiesWithoutUndo();
+        // Paredes y rejilla de caminos de la distribución actual (ver DemoSceneBuilder.Layout.cs)
+        BuildLayoutWalls();
     }
 
     private static void MarkObstacle(GameObject go)

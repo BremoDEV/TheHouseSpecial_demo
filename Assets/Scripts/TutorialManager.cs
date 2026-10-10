@@ -121,12 +121,12 @@ public class TutorialManager : MonoBehaviour
         yield return Step("Está bebiendo. Después pedirá la CARTA (para comer) o la CUENTA (para irse).",
             () => group.State >= GroupState.WantsMenu, table.transform);
 
-        yield return Step("Quiere la CARTA. Coge una en el stand de CARTAS y llévasela a la mesa.",
+        yield return Step("Quiere la CARTA. Coge una en CARTAS (junto al TPV) y llévasela a la mesa.",
             () => group.State >= GroupState.ChoosingFood, menus,
             () => HoldsItem(HeldItemType.Menu) ? table.transform : menus);
 
         // --- Cubiertos ---
-        yield return Step("Para comer necesita CUBIERTOS. Cógelos en la punta de la barra y llévaselos.\n" +
+        yield return Step("Para comer necesita CUBIERTOS. Cógelos en la esquina de la barra y llévaselos.\n" +
                           "Sin cubiertos no se puede servir la comida.",
             () => group.HasCutlery, cutlery, () => HoldsItem(HeldItemType.Cutlery) ? table.transform : cutlery);
 
