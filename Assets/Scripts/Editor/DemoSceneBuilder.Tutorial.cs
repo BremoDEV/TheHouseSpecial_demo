@@ -219,14 +219,14 @@ public static partial class DemoSceneBuilder
         fondo.raycastTarget = false;
         fondo.preserveAspect = false;
         Stretch(fondo.gameObject, 0f); // ocupa toda la pantalla, sea cual sea su forma
-        var logo = MenuImage("Titulo", c, "menu_titulo", center, new Vector2(0f, 325f), new Vector2(900f, 347f), 0f);
+        var logo = MenuImage("Titulo", c, "menu_titulo", center, new Vector2(-370f, 255f), new Vector2(900f, 347f), 0f); // arriba a la izquierda
         logo.raycastTarget = false;
-        var libreta = MenuImage("Libreta", c, "menu_libreta", center, new Vector2(-610f, -175f), new Vector2(600f, 660f), 0f);
+        var libreta = MenuImage("Libreta", c, "menu_libreta", center, new Vector2(390f, -84f), new Vector2(648f, 713f), 0f); // a la derecha
         libreta.raycastTarget = false;
 
-        var tutorial = MenuTicket("BtnTutorial", c, "menu_comanda_tutorial", new Vector2(-600f, -110f), -2f);
-        var play = MenuTicket("BtnJugar", c, "menu_comanda_jugar", new Vector2(-600f, -235f), 1.5f);
-        var quit = MenuTicket("BtnSalir", c, "menu_comanda_salir", new Vector2(-600f, -360f), -1f);
+        var tutorial = MenuTicket("BtnTutorial", c, "menu_comanda_tutorial", new Vector2(401f, -14f), -2f);
+        var play = MenuTicket("BtnJugar", c, "menu_comanda_jugar", new Vector2(401f, -149f), 1.5f);
+        var quit = MenuTicket("BtnSalir", c, "menu_comanda_salir", new Vector2(401f, -284f), -1f);
 
         var menu = canvasGo.AddComponent<MainMenu>();
         Set(menu, "tutorialButton", tutorial);
@@ -272,10 +272,10 @@ public static partial class DemoSceneBuilder
         return img;
     }
 
-    // Botón con forma de comanda (450 de ancho; el alto sale del dibujo)
+    // Botón con forma de comanda (486 de ancho; el alto sale del dibujo)
     private static Button MenuTicket(string name, Transform parent, string file, Vector2 pos, float angle)
     {
-        var img = MenuImage(name, parent, file, new Vector2(0.5f, 0.5f), pos, new Vector2(450f, 186f), angle, true);
+        var img = MenuImage(name, parent, file, new Vector2(0.5f, 0.5f), pos, new Vector2(486f, 201f), angle, true);
         var button = img.gameObject.AddComponent<Button>();
         button.targetGraphic = img;
         button.transition = Selectable.Transition.None; // la animación la hace TicketButton
