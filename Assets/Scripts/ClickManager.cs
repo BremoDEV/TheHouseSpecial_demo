@@ -100,13 +100,14 @@ public class ClickManager : MonoBehaviour
     // Elige qué se ha clicado, con margen de error:
     // 1) Busca todo lo que haya en un círculo alrededor del ratón (radio = clickTolerance).
     // 2) Entre los clientes y objetos clicables, se queda con el MÁS CERCANO al ratón
-    //    (si dos están igual de cerca, gana el cliente).
+    //    (si dos están igual de cerca, gana el cliente, y si no, el objeto más pequeño).
     // 3) Si no hay nada clicable cerca, devuelve lo que haya justo debajo (pared, barra) o nada (suelo).
     private Collider2D PickCollider(Vector2 worldPos)
     {
         Collider2D best = null;
         float bestDistance = float.MaxValue;
         int bestScore = 0;
+        float bestArea = float.MaxValue;
 
         foreach (Collider2D h in Physics2D.OverlapCircleAll(worldPos, clickTolerance))
         {
@@ -117,12 +118,18 @@ public class ClickManager : MonoBehaviour
             // 0 si el ratón está dentro del collider; si no, la distancia hasta su borde
             float distance = Vector2.Distance(h.ClosestPoint(worldPos), worldPos);
             bool closer = distance < bestDistance - 0.01f;
-            bool tieButBetter = Mathf.Abs(distance - bestDistance) <= 0.01f && score > bestScore;
+            // Si están igual de cerca (p. ej. el ratón está dentro de los dos), gana el cliente;
+            // y entre dos objetos, el MÁS PEQUEÑO: así la caja de cubiertos, que está encima de la barra
+            // de sucios, se puede clicar aunque la barra también esté debajo del ratón.
+            float area = h.bounds.size.x * h.bounds.size.y;
+            bool tie = Mathf.Abs(distance - bestDistance) <= 0.01f;
+            bool tieButBetter = tie && (score > bestScore || (score == bestScore && area < bestArea));
             if (closer || tieButBetter)
             {
                 best = h;
                 bestDistance = distance;
                 bestScore = score;
+                bestArea = area;
             }
         }
 
