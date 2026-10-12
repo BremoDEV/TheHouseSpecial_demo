@@ -17,6 +17,18 @@ public class OrderBubbleDistortion : MonoBehaviour
     [Tooltip("Texto opcional con el nombre del producto (también se distorsiona)")]
     [SerializeField] private TMP_Text label;
 
+    [Header("Bocadillo con dibujo")]
+    [Tooltip("Fondo del bocadillo (si se deja vacío, busca un hijo llamado 'Bg')")]
+    [SerializeField] private Transform background;
+    [Tooltip("Dibujo de la nube (bocadillo de pensamiento). Si se deja vacío, se usa un rectángulo.")]
+    [SerializeField] private Sprite cloudSprite;
+    [Tooltip("Ancho (en unidades) de la nube")]
+    [SerializeField] private float cloudWidth = 1.4f;
+    [Tooltip("Tamaño del fondo rectangular si no hay nube")]
+    [SerializeField] private Vector2 artBubbleSize = new Vector2(0.85f, 0.75f);
+    [Tooltip("Tamaño (en unidades) del dibujo dentro del bocadillo")]
+    [SerializeField] private float artIconSize = 0.88f;
+
     [Header("1) Tambaleo (editable por diseño)")]
     [Range(0f, 1f)] [SerializeField] private float wobbleFrom = 0.5f;
     [Tooltip("Grados máximos de giro con la ira al 100%")]
@@ -46,6 +58,11 @@ public class OrderBubbleDistortion : MonoBehaviour
     private Vector3 baseLocalPosition;
     private Quaternion baseLocalRotation;
 
+    // Cómo era el bocadillo original (con texto), para volver a él si un producto no tiene dibujo
+    private Vector3 textBgScale, textIconPosition, textIconScale;
+    private SpriteRenderer backgroundRenderer;
+    private Sprite textBgSprite;
+
     private void Awake()
     {
         Initialize();
@@ -58,6 +75,19 @@ public class OrderBubbleDistortion : MonoBehaviour
         baseLocalPosition = transform.localPosition;
         baseLocalRotation = transform.localRotation;
         seed = Random.value * 100f; // cada bocadillo se mueve distinto
+
+        if (background == null) background = transform.Find("Bg");
+        if (background != null)
+        {
+            textBgScale = background.localScale;
+            backgroundRenderer = background.GetComponent<SpriteRenderer>();
+            if (backgroundRenderer != null) textBgSprite = backgroundRenderer.sprite;
+        }
+        if (iconRenderer != null)
+        {
+            textIconPosition = iconRenderer.transform.localPosition;
+            textIconScale = iconRenderer.transform.localScale;
+        }
     }
 
     // Lo llama Customer.SetOrder. null = sin pedido.
@@ -70,6 +100,37 @@ public class OrderBubbleDistortion : MonoBehaviour
         transform.localPosition = baseLocalPosition;
         transform.localRotation = baseLocalRotation;
         ShowItem(item, 0f);
+    }
+
+    // Bocadillo con dibujo: más cuadrado, el dibujo en el centro y sin texto.
+    // Sin dibujo: el bocadillo alargado de siempre con cuadrado de color y nombre.
+    private void ApplyLayout(MenuItem item)
+    {
+        bool art = item != null && item.icon != null;
+        if (label != null) label.gameObject.SetActive(!art);
+        if (background != null)
+        {
+            bool cloud = art && cloudSprite != null && backgroundRenderer != null;
+            if (backgroundRenderer != null) backgroundRenderer.sprite = cloud ? cloudSprite : textBgSprite;
+            if (cloud)
+                background.localScale = Vector3.one * (cloudWidth / Mathf.Max(0.01f, cloudSprite.bounds.size.x));
+            else
+                background.localScale = art ? new Vector3(artBubbleSize.x, artBubbleSize.y, 1f) : textBgScale;
+        }
+        if (iconRenderer == null) return;
+
+        Transform icon = iconRenderer.transform;
+        if (art)
+        {
+            icon.localPosition = Vector3.zero;
+            float width = Mathf.Max(0.01f, item.icon.bounds.size.x);
+            icon.localScale = Vector3.one * (artIconSize / width);
+        }
+        else
+        {
+            icon.localPosition = textIconPosition;
+            icon.localScale = textIconScale;
+        }
     }
 
     private void Update()
@@ -132,17 +193,29 @@ public class OrderBubbleDistortion : MonoBehaviour
     private void ShowItem(MenuItem item, float hueShift)
     {
         if (item == null) return;
+        ApplyLayout(item);
         if (label != null) label.text = item.displayName;
         if (iconRenderer == null) return;
         if (item.icon != null) iconRenderer.sprite = item.icon;
 
-        Color c = item.placeholderColor;
-        if (Mathf.Abs(hueShift) > 0.0001f)
+        Color c;
+        if (item.icon != null)
         {
-            Color.RGBToHSV(c, out float h, out float s, out float v);
-            h = Mathf.Repeat(h + hueShift, 1f);
-            c = Color.HSVToRGB(h, s, v);
-            c.a = item.placeholderColor.a;
+            // Dibujo: normalmente sin teñir; con mucha ira se le pone un tinte de color que va cambiando
+            float amount = Mathf.Clamp01(Mathf.Abs(hueShift) * 4f);
+            Color tint = Color.HSVToRGB(Mathf.Repeat(0.5f + hueShift * 3f, 1f), 1f, 1f);
+            c = Color.Lerp(Color.white, tint, amount * 0.6f);
+        }
+        else
+        {
+            c = item.placeholderColor;
+            if (Mathf.Abs(hueShift) > 0.0001f)
+            {
+                Color.RGBToHSV(c, out float h, out float s, out float v);
+                h = Mathf.Repeat(h + hueShift, 1f);
+                c = Color.HSVToRGB(h, s, v);
+                c.a = item.placeholderColor.a;
+            }
         }
         iconRenderer.color = c;
     }

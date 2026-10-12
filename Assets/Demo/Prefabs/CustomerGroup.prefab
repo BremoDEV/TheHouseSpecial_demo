@@ -1048,6 +1048,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrderBubbleDistortion
   iconRenderer: {fileID: 3506243318717655427}
   label: {fileID: 832659949353460491}
+  background: {fileID: 0}
+  cloudSprite: {fileID: 21300000, guid: c2111ba06a55fe14d9b4e3c1bce5bbdb, type: 3}
+  cloudWidth: 1.4
+  artBubbleSize: {x: 0.85, y: 0.75}
+  artIconSize: 0.88
   wobbleFrom: 0.5
   maxWobbleDegrees: 18
   wobbleSpeed: 6
@@ -2030,6 +2035,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::OrderBubbleDistortion
   iconRenderer: {fileID: 4681197317839609871}
   label: {fileID: 3512188757503754838}
+  background: {fileID: 0}
+  cloudSprite: {fileID: 21300000, guid: c2111ba06a55fe14d9b4e3c1bce5bbdb, type: 3}
+  cloudWidth: 1.4
+  artBubbleSize: {x: 0.85, y: 0.75}
+  artIconSize: 0.88
   wobbleFrom: 0.5
   maxWobbleDegrees: 18
   wobbleSpeed: 6

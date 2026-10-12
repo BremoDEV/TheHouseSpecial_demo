@@ -30,6 +30,9 @@ public class MenuItem : ScriptableObject
     [Tooltip("Multiplicador de precio. 1 = normal, 1.5 = un 50% más caro")]
     [Min(0f)] public float priceMultiplier = 1f;
 
+    // Color con el que se pinta el icono: blanco si hay dibujo (para no teñirlo), el provisional si no
+    public Color IconColor => icon != null ? Color.white : placeholderColor;
+
     // ¿Sirve este producto para un cliente que pidió 'other'?
     public bool Matches(MenuItem other)
     {

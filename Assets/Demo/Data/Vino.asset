@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuItem
   displayName: Vino
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: ec0a15d77bfd83d4f9c91b045eebabae, type: 3}
   placeholderColor: {r: 0.6, g: 0.2, b: 0.55, a: 1}
   replaces: {fileID: 0}
   priceMultiplier: 1

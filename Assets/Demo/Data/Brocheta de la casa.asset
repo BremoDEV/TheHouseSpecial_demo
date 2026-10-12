@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfefd526e6017a645bf03897addc41e3, type: 3}
+  m_Name: Brocheta de la casa
+  m_EditorClassIdentifier: Assembly-CSharp::MenuItem
+  displayName: Brocheta de la casa
+  category: 1
+  icon: {fileID: 21300000, guid: 55d6829ecb8fca74f9333a313473256f, type: 3}
+  placeholderColor: {r: 0.3, g: 0.45, b: 0.95, a: 1}
+  replaces: {fileID: 11400000, guid: 7ff89afc13d413e42a6c7783dbac8bb7, type: 2}
+  priceMultiplier: 1.5

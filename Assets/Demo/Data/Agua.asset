@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuItem
   displayName: Agua
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 09a935f951e7d6345bcb80a6d492ccd7, type: 3}
   placeholderColor: {r: 0.55, g: 0.85, b: 1, a: 1}
   replaces: {fileID: 0}
   priceMultiplier: 1

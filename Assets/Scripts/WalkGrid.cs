@@ -84,12 +84,16 @@ public class WalkGrid : MonoBehaviour
             return result;
         }
 
-        List<Vector2> cells = AStar(start, goal);
+        List<Vector2> cells = AStar(start, goal, out bool reachedGoal);
         if (cells == null)
         {
-            result.Add(finalPoint); // no hay camino: va en línea recta
+            result.Add(finalPoint);
             return result;
         }
+
+        // Si el destino no se puede alcanzar (p. ej. detrás de la barra, en la cocina),
+        // NO se atraviesa nada: se va al punto alcanzable más cercano.
+        if (!reachedGoal) finalPoint = cells[cells.Count - 1];
 
         // Suavizado: desde cada punto, saltar al más lejano que se vea en línea recta
         cells.Add(finalPoint);
@@ -109,8 +113,14 @@ public class WalkGrid : MonoBehaviour
         return result;
     }
 
-    private List<Vector2> AStar(int start, int goal)
+    // Devuelve el camino de casillas. Si no se puede llegar a 'goal', devuelve el camino
+    // hasta la casilla alcanzable más cercana a él (reachedGoal = false).
+    private List<Vector2> AStar(int start, int goal, out bool reachedGoal)
     {
+        reachedGoal = false;
+        int closest = start;
+        float closestDistance = Heuristic(start, goal);
+
         int n = width * height;
         var gCost = new float[n];
         var parent = new int[n];
@@ -124,9 +134,20 @@ public class WalkGrid : MonoBehaviour
         while (open.Count > 0)
         {
             int current = open.Pop();
-            if (current == goal) return Reconstruct(parent, goal);
+            if (current == goal)
+            {
+                reachedGoal = true;
+                return Reconstruct(parent, goal);
+            }
             if (closed[current]) continue;
             closed[current] = true;
+
+            float distance = Heuristic(current, goal);
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closest = current;
+            }
 
             int cx = current % width, cy = current / width;
             for (int dy = -1; dy <= 1; dy++)
@@ -151,7 +172,7 @@ public class WalkGrid : MonoBehaviour
                 }
             }
         }
-        return null;
+        return Reconstruct(parent, closest); // no hay camino: hasta lo más cerca posible
     }
 
     private List<Vector2> Reconstruct(int[] parent, int goal)

@@ -82,6 +82,7 @@ public static partial class DemoSceneBuilder
             EditorUtility.DisplayProgressBar("Montar escena demo", "Guardando...", 0.9f);
             AssetDatabase.SaveAssets();
             WireProductsFromDisk();
+            ApplyArtToScene(); // si existe Assets/Arte: carta con dibujos, platos en las mesas, especiales
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene, ScenePath);
             AddSceneToBuild();
@@ -528,7 +529,7 @@ public static partial class DemoSceneBuilder
 
     private static void SetLooks(CustomerSpawner spawner)
     {
-        string[] names = { "Pájaro azul", "Gato", "Rana", "Cerdo" };
+        string[] names = { "Pájaro azul", "Perro", "Rana", "Cerdo" };
         Color[] colors =
         {
             new Color(0.3f, 0.5f, 1f), new Color(1f, 0.6f, 0.2f),

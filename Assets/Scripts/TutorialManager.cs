@@ -45,7 +45,7 @@ public class TutorialManager : MonoBehaviour
     [SerializeField] private TpvPanel tpvPanel;
 
     [Header("Clientes del tutorial (nombres de los Looks del CustomerSpawner)")]
-    [SerializeField] private string firstCustomerType = "Gato";
+    [SerializeField] private string firstCustomerType = "Perro";
     [SerializeField] private string specialCustomerType = "Pájaro azul";
 
     private Transform arrowTarget;

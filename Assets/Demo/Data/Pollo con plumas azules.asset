@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuItem
   displayName: Pollo con plumas azules
   category: 1
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e57fe113bd23f5a469d6152b12d18e3b, type: 3}
   placeholderColor: {r: 0.3, g: 0.45, b: 0.95, a: 1}
   replaces: {fileID: 11400000, guid: c236ff304f46d244a82ac5068ce502b4, type: 2}
   priceMultiplier: 1.5

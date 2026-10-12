@@ -30,6 +30,12 @@ public class TpvPanel : MonoBehaviour
     [Tooltip("Texto opcional que muestra la ocupación de la barra, p. ej. 'Barra: 3/6'")]
     [SerializeField] private TMP_Text statusText;
 
+    [Header("Botones con dibujo")]
+    [Tooltip("Tamaño de cada botón cuando los productos tienen dibujo")]
+    [SerializeField] private Vector2 artButtonSize = new Vector2(170f, 130f);
+    [Tooltip("Color de fondo de los botones con dibujo")]
+    [SerializeField] private Color artButtonColor = new Color(0.93f, 0.9f, 0.84f);
+
     private WaitressController waitress;
     private readonly List<MenuItem> selection = new List<MenuItem>();
 
@@ -61,6 +67,7 @@ public class TpvPanel : MonoBehaviour
             return;
         }
 
+        bool anyArt = false;
         foreach (MenuItem item in Kitchen.Instance.Menu)
         {
             if (item == null) continue;
@@ -70,10 +77,42 @@ public class TpvPanel : MonoBehaviour
             TMP_Text label = b.GetComponentInChildren<TMP_Text>();
             if (label != null) label.text = item.displayName;
 
-            if (b.image != null) b.image.color = item.placeholderColor;
+            if (item.icon != null)
+            {
+                // Con dibujo: el botón enseña la imagen en vez del nombre
+                anyArt = true;
+                if (b.image != null) b.image.color = artButtonColor;
+                if (label != null) label.gameObject.SetActive(false);
+                AddIcon(b.transform, item.icon);
+            }
+            else if (b.image != null)
+            {
+                b.image.color = item.placeholderColor;
+            }
 
             b.onClick.AddListener(() => OnProductPressed(item));
         }
+
+        // Los dibujos necesitan botones más altos
+        GridLayoutGroup grid = buttonContainer.GetComponent<GridLayoutGroup>();
+        if (anyArt && grid != null) grid.cellSize = artButtonSize;
+    }
+
+    // Imagen del producto dentro del botón, ocupando casi todo el botón
+    private static void AddIcon(Transform button, Sprite sprite)
+    {
+        var go = new GameObject("Icono", typeof(RectTransform));
+        go.layer = button.gameObject.layer;
+        go.transform.SetParent(button, false);
+        var rt = (RectTransform)go.transform;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(8f, 8f);
+        rt.offsetMax = new Vector2(-8f, -8f);
+        var img = go.AddComponent<Image>();
+        img.sprite = sprite;
+        img.preserveAspect = true;
+        img.raycastTarget = false; // el clic lo recoge el botón
     }
 
     // Cuando aparece un plato especial, se rehacen los botones

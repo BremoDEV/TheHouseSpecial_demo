@@ -30,10 +30,31 @@ public class Table : Interactable
     [SerializeField] private Color occupiedColor = new Color(0.6f, 0.8f, 1f);
     [SerializeField] private Color dirtyColor = new Color(0.55f, 0.4f, 0.25f);
 
+    [Header("Platos y bebidas encima de la mesa")]
+    [Tooltip("Plato limpio: aparece al poner los cubiertos")]
+    [SerializeField] private Sprite cleanPlateSprite;
+    [Tooltip("Plato sucio: lo que queda cuando terminan de comer o beber")]
+    [SerializeField] private Sprite dirtyPlateSprite;
+    [Tooltip("Tamaño (en unidades) de cada plato o bebida sobre la mesa")]
+    [SerializeField] private float itemSize = 0.75f;
+    [Tooltip("Dónde va la bebida de cada cliente (izquierda y derecha), respecto al centro de la mesa")]
+    [SerializeField] private Vector2[] drinkSpots = { new Vector2(-0.42f, 0.16f), new Vector2(0.42f, 0.16f) };
+    [Tooltip("Dónde va el plato de cada cliente (izquierda y derecha), respecto al centro de la mesa")]
+    [SerializeField] private Vector2[] plateSpots = { new Vector2(-0.26f, -0.1f), new Vector2(0.26f, -0.1f) };
+
+    private SpriteRenderer[] drinkSlots;
+    private SpriteRenderer[] plateSlots;
+
     public TableState State => state;
     public CustomerGroup Group { get; private set; }
     public bool HasPeople => Group != null;
     public bool IsAvailableForSeating => state == TableState.Empty && Group == null;
+
+    private void Awake()
+    {
+        drinkSlots = CreateSlots("Bebida", drinkSpots, 2);
+        plateSlots = CreateSlots("Plato", plateSpots, 3);
+    }
 
     private void Start()
     {
@@ -80,13 +101,88 @@ public class Table : Interactable
     public void ReleaseGroup(bool leaveDirty)
     {
         Group = null;
-        SetCutlery(false);
+        if (cutleryVisual != null) cutleryVisual.SetActive(false);
+        if (!leaveDirty) ClearItems(); // si no han tomado nada, la mesa queda limpia
         SetState(leaveDirty ? TableState.Dirty : TableState.Empty);
     }
 
+    // Poner la mesa. Si hay dibujo de plato limpio, sale un plato por cliente; si no, la barrita gris.
     public void SetCutlery(bool visible)
     {
-        if (cutleryVisual != null) cutleryVisual.SetActive(visible);
+        bool usePlates = visible && cleanPlateSprite != null && plateSlots != null;
+        if (cutleryVisual != null) cutleryVisual.SetActive(visible && !usePlates);
+        if (!usePlates) return;
+
+        int people = Group != null ? Group.Size : plateSlots.Length;
+        for (int i = 0; i < people && i < plateSlots.Length; i++)
+            if (!plateSlots[i].enabled) Show(plateSlots[i], cleanPlateSprite, Color.white);
+    }
+
+    // ------------------------------------------------------------- PLATOS Y BEBIDAS
+
+    // Al servir: el producto se queda en la mesa delante del cliente 'seat'
+    public void ShowServed(int seat, MenuItem item)
+    {
+        SpriteRenderer[] slots = item.category == ItemCategory.Drink ? drinkSlots : plateSlots;
+        if (slots == null || seat < 0 || seat >= slots.Length) return;
+        Show(slots[seat], item.icon, item.IconColor);
+    }
+
+    // Al terminar de beber o de comer: lo que había se convierte en plato sucio
+    public void FinishConsuming(ItemCategory category)
+    {
+        SpriteRenderer[] slots = category == ItemCategory.Drink ? drinkSlots : plateSlots;
+        if (slots == null) return;
+        foreach (SpriteRenderer r in slots)
+            if (r.enabled) Show(r, dirtyPlateSprite, dirtyColor);
+    }
+
+    private void ClearItems()
+    {
+        if (drinkSlots != null) foreach (SpriteRenderer r in drinkSlots) r.enabled = false;
+        if (plateSlots != null) foreach (SpriteRenderer r in plateSlots) r.enabled = false;
+    }
+
+    // Enseña un dibujo (o un cuadrado de color si no hay dibujo) con el tamaño 'itemSize'
+    private void Show(SpriteRenderer r, Sprite sprite, Color colorIfNoSprite)
+    {
+        if (sprite != null)
+        {
+            r.sprite = sprite;
+            r.color = Color.white;
+            r.transform.localScale = Vector3.one * (itemSize / Mathf.Max(0.01f, sprite.bounds.size.x));
+        }
+        else
+        {
+            r.sprite = squareSprite;
+            r.color = colorIfNoSprite;
+            r.transform.localScale = Vector3.one * itemSize * 0.5f;
+        }
+        r.enabled = true;
+    }
+
+    private Sprite squareSprite; // el mismo cuadrado que usa la mesa, para cuando no hay dibujo
+
+    private SpriteRenderer[] CreateSlots(string baseName, Vector2[] spots, int order)
+    {
+        if (tableRenderer != null) squareSprite = tableRenderer.sprite;
+        var result = new SpriteRenderer[spots.Length];
+        for (int i = 0; i < spots.Length; i++)
+        {
+            var go = new GameObject($"{baseName}_{i + 1}");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = spots[i];
+            var r = go.AddComponent<SpriteRenderer>();
+            r.sortingOrder = order;
+            if (tableRenderer != null)
+            {
+                r.sharedMaterial = tableRenderer.sharedMaterial;
+                r.sortingLayerID = tableRenderer.sortingLayerID;
+            }
+            r.enabled = false;
+            result[i] = r;
+        }
+        return result;
     }
 
     public void SetState(TableState newState)
@@ -97,6 +193,7 @@ public class Table : Interactable
 
     public void Clean()
     {
+        ClearItems();
         SetState(TableState.Empty);
         Debug.Log($"{name}: mesa recogida.");
     }

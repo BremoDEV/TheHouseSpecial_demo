@@ -17,6 +17,9 @@ public class CounterItem : Interactable
     [Tooltip("OPCIÓN B (más fácil): un sprite rectangular hijo que se va encogiendo")]
     [SerializeField] private Transform timerBar;
 
+    [Tooltip("Cuánto se agranda el producto cuando tiene dibujo (los dibujos llevan margen transparente)")]
+    [SerializeField] private float artScale = 1.6f;
+
     // Para el tutorial: mientras sea true, nada se pone malo en la barra
     public static bool SpoilPaused { get; set; }
 
@@ -47,7 +50,14 @@ public class CounterItem : Interactable
         if (iconRenderer != null)
         {
             if (item.icon != null) iconRenderer.sprite = item.icon;
-            iconRenderer.color = item.placeholderColor;
+            iconRenderer.color = item.IconColor;
+        }
+
+        // Con dibujo: más grande y sin el nombre encima (el dibujo ya dice qué es)
+        if (item.icon != null)
+        {
+            transform.localScale *= artScale;
+            if (label != null) label.gameObject.SetActive(false);
         }
         UpdateTimerVisual();
     }

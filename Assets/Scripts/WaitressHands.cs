@@ -48,7 +48,13 @@ public class WaitressHands : MonoBehaviour
     [SerializeField] private Sprite dirtyDishesIcon;
     [SerializeField] private Color dirtyDishesColor = new Color(0.45f, 0.35f, 0.25f);
 
+    [Header("Tamaño de los dibujos en las manos")]
+    [Tooltip("Tamaño (en unidades) de un objeto con dibujo en la mano. Sin dibujo se usa el cuadrado de siempre.")]
+    [SerializeField] private float artSize = 0.6f;
+
     private readonly HeldItem[] slots = new HeldItem[HandCount];
+    private Sprite[] defaultSprites;   // el cuadrado de cada mano, para volver a él
+    private Vector3[] defaultScales;
 
     public bool HasFreeHand
     {
@@ -57,6 +63,18 @@ public class WaitressHands : MonoBehaviour
             foreach (HeldItem s in slots)
                 if (s == null) return true;
             return false;
+        }
+    }
+
+    private void Awake()
+    {
+        defaultSprites = new Sprite[handIcons.Length];
+        defaultScales = new Vector3[handIcons.Length];
+        for (int i = 0; i < handIcons.Length; i++)
+        {
+            if (handIcons[i] == null) continue;
+            defaultSprites[i] = handIcons[i].sprite;
+            defaultScales[i] = handIcons[i].transform.localScale;
         }
     }
 
@@ -136,8 +154,21 @@ public class WaitressHands : MonoBehaviour
             if (item == null) continue;
 
             GetLook(item, out Sprite icon, out Color color);
-            if (icon != null) r.sprite = icon;
-            r.color = color;
+            if (icon != null)
+            {
+                // Dibujo: sin teñir y escalado para que mida 'artSize'
+                r.sprite = icon;
+                r.color = Color.white;
+                float width = Mathf.Max(0.01f, icon.bounds.size.x);
+                r.transform.localScale = Vector3.one * (artSize / width);
+            }
+            else
+            {
+                // Sin dibujo: el cuadrado de color de siempre
+                if (defaultSprites != null && i < defaultSprites.Length && defaultSprites[i] != null) r.sprite = defaultSprites[i];
+                if (defaultScales != null && i < defaultScales.Length) r.transform.localScale = defaultScales[i];
+                r.color = color;
+            }
         }
     }
 

@@ -422,6 +422,8 @@ MonoBehaviour:
   clearButton: {fileID: 1696852269}
   selectionText: {fileID: 1794651926}
   statusText: {fileID: 1634268786}
+  artButtonSize: {x: 170, y: 130}
+  artButtonColor: {r: 0.93, g: 0.9, b: 0.84, a: 1}
 --- !u!114 &187782912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1492,6 +1494,15 @@ MonoBehaviour:
   emptyColor: {r: 1, g: 1, b: 1, a: 1}
   occupiedColor: {r: 0.6, g: 0.8, b: 1, a: 1}
   dirtyColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  cleanPlateSprite: {fileID: 21300000, guid: 4a69e980d1b456f43a92fbc4a8d44f79, type: 3}
+  dirtyPlateSprite: {fileID: 21300000, guid: ce46eac666e580a45be6743d3d1a99e3, type: 3}
+  itemSize: 0.75
+  drinkSpots:
+  - {x: -0.42, y: 0.16}
+  - {x: 0.42, y: 0.16}
+  plateSpots:
+  - {x: -0.26, y: -0.1}
+  - {x: 0.26, y: -0.1}
 --- !u!210 &313059021
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -2636,6 +2647,15 @@ MonoBehaviour:
   emptyColor: {r: 1, g: 1, b: 1, a: 1}
   occupiedColor: {r: 0.6, g: 0.8, b: 1, a: 1}
   dirtyColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  cleanPlateSprite: {fileID: 21300000, guid: 4a69e980d1b456f43a92fbc4a8d44f79, type: 3}
+  dirtyPlateSprite: {fileID: 21300000, guid: ce46eac666e580a45be6743d3d1a99e3, type: 3}
+  itemSize: 0.75
+  drinkSpots:
+  - {x: -0.42, y: 0.16}
+  - {x: 0.42, y: 0.16}
+  plateSpots:
+  - {x: -0.26, y: -0.1}
+  - {x: 0.26, y: -0.1}
 --- !u!210 &720897551
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -4177,6 +4197,15 @@ MonoBehaviour:
   emptyColor: {r: 1, g: 1, b: 1, a: 1}
   occupiedColor: {r: 0.6, g: 0.8, b: 1, a: 1}
   dirtyColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  cleanPlateSprite: {fileID: 21300000, guid: 4a69e980d1b456f43a92fbc4a8d44f79, type: 3}
+  dirtyPlateSprite: {fileID: 21300000, guid: ce46eac666e580a45be6743d3d1a99e3, type: 3}
+  itemSize: 0.75
+  drinkSpots:
+  - {x: -0.42, y: 0.16}
+  - {x: 0.42, y: 0.16}
+  plateSpots:
+  - {x: -0.26, y: -0.1}
+  - {x: 0.26, y: -0.1}
 --- !u!210 &1061454718
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -6342,8 +6371,9 @@ MonoBehaviour:
   cutleryColor: {r: 0.75, g: 0.75, b: 0.8, a: 1}
   billIcon: {fileID: 0}
   billColor: {r: 0.25, g: 0.5, b: 0.95, a: 1}
-  dirtyDishesIcon: {fileID: 0}
+  dirtyDishesIcon: {fileID: 21300000, guid: bdb6605d00c9338418b12b80d630bb77, type: 3}
   dirtyDishesColor: {r: 0.45, g: 0.35, b: 0.25, a: 1}
+  artSize: 0.6
 --- !u!210 &1280350470
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -8414,7 +8444,7 @@ MonoBehaviour:
   - typeName: "P\xE1jaro azul"
     sprite: {fileID: 0}
     tint: {r: 0.3, g: 0.5, b: 1, a: 1}
-  - typeName: Gato
+  - typeName: Perro
     sprite: {fileID: 0}
     tint: {r: 1, g: 0.6, b: 0.2, a: 1}
   - typeName: Rana
@@ -9254,17 +9284,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Kitchen
   menu:
   - {fileID: 11400000, guid: a355f389997989745a4c9a80956c4f11, type: 2}
-  - {fileID: 11400000, guid: cbfba00f31bd73c4f90517bdaf993418, type: 2}
-  - {fileID: 11400000, guid: a40ecb452bee5654393d0be492c40c84, type: 2}
   - {fileID: 11400000, guid: d3efe1f621fe18f41a59bc4e201d7bb0, type: 2}
+  - {fileID: 11400000, guid: 7ff89afc13d413e42a6c7783dbac8bb7, type: 2}
   - {fileID: 11400000, guid: c236ff304f46d244a82ac5068ce502b4, type: 2}
-  - {fileID: 11400000, guid: ac0e9293bbcad07469429bad7b7430e4, type: 2}
-  - {fileID: 11400000, guid: 8e47a5cdd4f4a7b45951e54353d138ef, type: 2}
-  - {fileID: 11400000, guid: 200f7d8633c36cf4c99512d923c2a58b, type: 2}
   specialVariants:
   - customerType: "P\xE1jaro azul"
     original: {fileID: 11400000, guid: c236ff304f46d244a82ac5068ce502b4, type: 2}
     variant: {fileID: 11400000, guid: eadad92026ed70b4abc29199f7355a95, type: 2}
+  - customerType: Perro
+    original: {fileID: 11400000, guid: 7ff89afc13d413e42a6c7783dbac8bb7, type: 2}
+    variant: {fileID: 11400000, guid: 91c2390b9377d5049926613d7fcc440a, type: 2}
   drinkPrepTime: 3
   foodPrepTime: 8
   drinkSpoilTime: 25
@@ -10636,6 +10665,15 @@ MonoBehaviour:
   emptyColor: {r: 1, g: 1, b: 1, a: 1}
   occupiedColor: {r: 0.6, g: 0.8, b: 1, a: 1}
   dirtyColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  cleanPlateSprite: {fileID: 21300000, guid: 4a69e980d1b456f43a92fbc4a8d44f79, type: 3}
+  dirtyPlateSprite: {fileID: 21300000, guid: ce46eac666e580a45be6743d3d1a99e3, type: 3}
+  itemSize: 0.75
+  drinkSpots:
+  - {x: -0.42, y: 0.16}
+  - {x: 0.42, y: 0.16}
+  plateSpots:
+  - {x: -0.26, y: -0.1}
+  - {x: 0.26, y: -0.1}
 --- !u!210 &2009476146
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -11277,6 +11315,15 @@ MonoBehaviour:
   emptyColor: {r: 1, g: 1, b: 1, a: 1}
   occupiedColor: {r: 0.6, g: 0.8, b: 1, a: 1}
   dirtyColor: {r: 0.55, g: 0.4, b: 0.25, a: 1}
+  cleanPlateSprite: {fileID: 21300000, guid: 4a69e980d1b456f43a92fbc4a8d44f79, type: 3}
+  dirtyPlateSprite: {fileID: 21300000, guid: ce46eac666e580a45be6743d3d1a99e3, type: 3}
+  itemSize: 0.75
+  drinkSpots:
+  - {x: -0.42, y: 0.16}
+  - {x: 0.42, y: 0.16}
+  plateSpots:
+  - {x: -0.26, y: -0.1}
+  - {x: 0.26, y: -0.1}
 --- !u!210 &2101356918
 SortingGroup:
   m_ObjectHideFlags: 0

@@ -313,6 +313,7 @@ public class CustomerGroup : MonoBehaviour
             case GroupState.Drinking:
                 if (TickTimer())
                 {
+                    if (AssignedTable != null) AssignedTable.FinishConsuming(ItemCategory.Drink);
                     // Si el restaurante ya ha cerrado, no piden comida: piden la cuenta
                     bool closed = DayManager.Instance != null && DayManager.Instance.IsClosed;
                     bool wantsFood = ForcedFoodChoice ?? (!closed && Random.value < chanceToOrderFood);
@@ -325,7 +326,11 @@ public class CustomerGroup : MonoBehaviour
                 break;
 
             case GroupState.Eating:
-                if (TickTimer()) EnterState(GroupState.WantsBill);
+                if (TickTimer())
+                {
+                    if (AssignedTable != null) AssignedTable.FinishConsuming(ItemCategory.Food);
+                    EnterState(GroupState.WantsBill);
+                }
                 break;
 
             case GroupState.Leaving:
@@ -421,6 +426,7 @@ public class CustomerGroup : MonoBehaviour
             hands.RemoveAt(h);
             memberOrders[member] = null;
             members[member].SetOrder(null);
+            if (AssignedTable != null) AssignedTable.ShowServed(member, held.product); // se queda en la mesa
             HasConsumedSomething = true;
             if (MoneyManager.Instance != null) moneyOwed += MoneyManager.Instance.PriceOf(held.product);
             deliveredSomething = true;
