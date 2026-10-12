@@ -42,9 +42,11 @@ public class Table : Interactable
     [Tooltip("Dónde va la bebida de cada cliente (izquierda y derecha), respecto al centro de la mesa")]
     [SerializeField] private Vector2[] drinkSpots = { new Vector2(-0.42f, 0.16f), new Vector2(0.42f, 0.16f) };
     [Tooltip("Dónde va el plato de cada cliente (izquierda y derecha), respecto al centro de la mesa")]
-    [SerializeField] private Vector2[] plateSpots = { new Vector2(-0.26f, -0.1f), new Vector2(0.26f, -0.1f) };
+    [SerializeField] private Vector2[] plateSpots = { new Vector2(-0.3f, -0.1f), new Vector2(0.3f, -0.1f) };
     [Tooltip("Dónde van los cubiertos de cada cliente (izquierda y derecha), por fuera del plato")]
-    [SerializeField] private Vector2[] cutlerySpots = { new Vector2(-0.6f, -0.08f), new Vector2(0.6f, -0.08f) };
+    [SerializeField] private Vector2[] cutlerySpots = { new Vector2(-0.8f, -0.08f), new Vector2(0.8f, -0.08f) };
+    [Tooltip("Tamaño (en unidades) de los cubiertos sobre la mesa")]
+    [SerializeField] private float cutlerySize = 0.6f;
 
     private SpriteRenderer[] drinkSlots;
     private SpriteRenderer[] plateSlots;
@@ -106,9 +108,16 @@ public class Table : Interactable
 
     public void ReleaseGroup(bool leaveDirty)
     {
+        int people = Group != null ? Group.Size : 0;
         Group = null;
         if (cutleryVisual != null) cutleryVisual.SetActive(false);
-        if (!leaveDirty) ClearItems(); // si no han tomado nada, la mesa queda limpia
+
+        // Al irse: se quita todo y, si han tomado algo, queda un plato sucio por cliente
+        ClearItems();
+        if (leaveDirty && plateSlots != null)
+            for (int i = 0; i < people && i < plateSlots.Length; i++)
+                Show(plateSlots[i], dirtyPlateSprite, dirtyColor);
+
         SetState(leaveDirty ? TableState.Dirty : TableState.Empty);
     }
 
@@ -121,7 +130,7 @@ public class Table : Interactable
 
         int people = Group != null ? Group.Size : cutlerySlots.Length;
         for (int i = 0; i < people && i < cutlerySlots.Length; i++)
-            Show(cutlerySlots[i], cutlerySprite, Color.white);
+            Show(cutlerySlots[i], cutlerySprite, Color.white, cutlerySize);
     }
 
     // ------------------------------------------------------------- PLATOS Y BEBIDAS
@@ -134,13 +143,12 @@ public class Table : Interactable
         Show(slots[seat], item.icon, item.IconColor);
     }
 
-    // Al terminar de beber o de comer: lo que había se convierte en plato sucio
+    // Al terminar de beber: las bebidas desaparecen sin más.
+    // Al terminar de comer: la comida se queda hasta que se van (entonces sale el plato sucio).
     public void FinishConsuming(ItemCategory category)
     {
-        SpriteRenderer[] slots = category == ItemCategory.Drink ? drinkSlots : plateSlots;
-        if (slots == null) return;
-        foreach (SpriteRenderer r in slots)
-            if (r.enabled) Show(r, dirtyPlateSprite, dirtyColor);
+        if (category != ItemCategory.Drink || drinkSlots == null) return;
+        foreach (SpriteRenderer r in drinkSlots) r.enabled = false;
     }
 
     private void ClearItems()
@@ -151,19 +159,20 @@ public class Table : Interactable
     }
 
     // Enseña un dibujo (o un cuadrado de color si no hay dibujo) con el tamaño 'itemSize'
-    private void Show(SpriteRenderer r, Sprite sprite, Color colorIfNoSprite)
+    private void Show(SpriteRenderer r, Sprite sprite, Color colorIfNoSprite, float size = -1f)
     {
+        if (size <= 0f) size = itemSize;
         if (sprite != null)
         {
             r.sprite = sprite;
             r.color = Color.white;
-            r.transform.localScale = Vector3.one * (itemSize / Mathf.Max(0.01f, sprite.bounds.size.x));
+            r.transform.localScale = Vector3.one * (size / Mathf.Max(0.01f, sprite.bounds.size.x));
         }
         else
         {
             r.sprite = squareSprite;
             r.color = colorIfNoSprite;
-            r.transform.localScale = Vector3.one * itemSize * 0.5f;
+            r.transform.localScale = Vector3.one * size * 0.5f;
         }
         r.enabled = true;
     }

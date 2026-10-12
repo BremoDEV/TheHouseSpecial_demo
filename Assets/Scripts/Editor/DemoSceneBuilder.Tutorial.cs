@@ -214,16 +214,19 @@ public static partial class DemoSceneBuilder
         var c = canvasGo.transform;
         var center = new Vector2(0.5f, 0.5f);
 
-        var title = MakeText("Titulo", c, "THE HOUSE SPECIAL", 120f, new Color(1f, 0.85f, 0.6f));
-        Place(title.gameObject, center, new Vector2(0f, 270f), new Vector2(1600f, 160f));
-        var subtitle = MakeText("Subtitulo", c, "Demo · Día 1", 44f, new Color(0.85f, 0.8f, 0.75f));
-        Place(subtitle.gameObject, center, new Vector2(0f, 170f), new Vector2(800f, 70f));
-        var hint = MakeText("Pista", c, "¿Primera vez? Empieza por el tutorial", 30f, new Color(0.7f, 0.65f, 0.6f));
-        Place(hint.gameObject, center, new Vector2(0f, 60f), new Vector2(900f, 50f));
+        // Arte del menú (Assets/Arte/Menu): fondo, logo, libreta y una comanda por botón
+        var fondo = MenuImage("Fondo", c, "menu_fondo", center, Vector2.zero, new Vector2(1920f, 1080f), 0f);
+        fondo.raycastTarget = false;
+        fondo.preserveAspect = false;
+        Stretch(fondo.gameObject, 0f); // ocupa toda la pantalla, sea cual sea su forma
+        var logo = MenuImage("Titulo", c, "menu_titulo", center, new Vector2(0f, 325f), new Vector2(900f, 347f), 0f);
+        logo.raycastTarget = false;
+        var libreta = MenuImage("Libreta", c, "menu_libreta", center, new Vector2(-610f, -175f), new Vector2(600f, 660f), 0f);
+        libreta.raycastTarget = false;
 
-        var tutorial = MakeButton("BtnTutorial", c, "Tutorial", center, new Vector2(0f, -30f), new Vector2(440f, 95f), new Color(0.25f, 0.65f, 0.3f), 42f);
-        var play = MakeButton("BtnJugar", c, "Jugar", center, new Vector2(0f, -145f), new Vector2(440f, 95f), new Color(0.25f, 0.5f, 0.95f), 42f);
-        var quit = MakeButton("BtnSalir", c, "Salir", center, new Vector2(0f, -260f), new Vector2(440f, 80f), new Color(0.35f, 0.35f, 0.42f), 36f);
+        var tutorial = MenuTicket("BtnTutorial", c, "menu_comanda_tutorial", new Vector2(-600f, -110f), -2f);
+        var play = MenuTicket("BtnJugar", c, "menu_comanda_jugar", new Vector2(-600f, -235f), 1.5f);
+        var quit = MenuTicket("BtnSalir", c, "menu_comanda_salir", new Vector2(-600f, -360f), -1f);
 
         var menu = canvasGo.AddComponent<MainMenu>();
         Set(menu, "tutorialButton", tutorial);
@@ -231,6 +234,53 @@ public static partial class DemoSceneBuilder
         Set(menu, "quitButton", quit);
 
         EditorSceneManager.SaveScene(scene, MenuScenePath);
+    }
+
+    // ------------------------------------------------------------------ ARTE DEL MENÚ
+
+    private const string MenuArtFolder = "Assets/Arte/Menu";
+
+    private static Sprite LoadMenuSprite(string fileName, bool readable)
+    {
+        string path = MenuArtFolder + "/" + fileName + ".png";
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null)
+        {
+            Debug.LogWarning("[Menú] No encuentro " + path);
+            return null;
+        }
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Single;
+        importer.mipmapEnabled = false;
+        importer.alphaIsTransparency = true;
+        importer.filterMode = FilterMode.Bilinear;
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.isReadable = readable; // las comandas lo necesitan para clicar solo sobre el papel
+        importer.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
+    private static Image MenuImage(string name, Transform parent, string file, Vector2 anchor, Vector2 pos, Vector2 size, float angle, bool readable = false)
+    {
+        var go = UI(name, parent);
+        Place(go, anchor, pos, size);
+        go.transform.localRotation = Quaternion.Euler(0f, 0f, angle);
+        var img = go.AddComponent<Image>();
+        img.sprite = LoadMenuSprite(file, readable);
+        img.preserveAspect = true;
+        if (img.sprite == null) img.color = new Color(1f, 1f, 1f, 0.2f);
+        return img;
+    }
+
+    // Botón con forma de comanda (450 de ancho; el alto sale del dibujo)
+    private static Button MenuTicket(string name, Transform parent, string file, Vector2 pos, float angle)
+    {
+        var img = MenuImage(name, parent, file, new Vector2(0.5f, 0.5f), pos, new Vector2(450f, 186f), angle, true);
+        var button = img.gameObject.AddComponent<Button>();
+        button.targetGraphic = img;
+        button.transition = Selectable.Transition.None; // la animación la hace TicketButton
+        img.gameObject.AddComponent<TicketButton>();
+        return button;
     }
 
     // ------------------------------------------------------------------ BUILD PROFILES

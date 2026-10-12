@@ -422,8 +422,9 @@ MonoBehaviour:
   clearButton: {fileID: 1696852269}
   selectionText: {fileID: 1794651926}
   statusText: {fileID: 1634268786}
-  artButtonSize: {x: 170, y: 130}
-  artButtonsPerRow: 6
+  rowButtonSize: {x: 160, y: 100}
+  rowSpacing: 8
+  rowsRaise: 30
   artButtonColor: {r: 0.93, g: 0.9, b: 0.84, a: 1}
 --- !u!114 &187782912
 MonoBehaviour:
@@ -1469,11 +1470,12 @@ MonoBehaviour:
   - {x: -0.42, y: 0.16}
   - {x: 0.42, y: 0.16}
   plateSpots:
-  - {x: -0.26, y: -0.1}
-  - {x: 0.26, y: -0.1}
+  - {x: -0.3, y: -0.1}
+  - {x: 0.3, y: -0.1}
   cutlerySpots:
-  - {x: -0.6, y: -0.08}
-  - {x: 0.6, y: -0.08}
+  - {x: -0.8, y: -0.08}
+  - {x: 0.8, y: -0.08}
+  cutlerySize: 0.6
 --- !u!210 &313059021
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -2826,11 +2828,12 @@ MonoBehaviour:
   - {x: -0.42, y: 0.16}
   - {x: 0.42, y: 0.16}
   plateSpots:
-  - {x: -0.26, y: -0.1}
-  - {x: 0.26, y: -0.1}
+  - {x: -0.3, y: -0.1}
+  - {x: 0.3, y: -0.1}
   cutlerySpots:
-  - {x: -0.6, y: -0.08}
-  - {x: 0.6, y: -0.08}
+  - {x: -0.8, y: -0.08}
+  - {x: 0.8, y: -0.08}
+  cutlerySize: 0.6
 --- !u!210 &720897551
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -4136,11 +4139,12 @@ MonoBehaviour:
   - {x: -0.42, y: 0.16}
   - {x: 0.42, y: 0.16}
   plateSpots:
-  - {x: -0.26, y: -0.1}
-  - {x: 0.26, y: -0.1}
+  - {x: -0.3, y: -0.1}
+  - {x: 0.3, y: -0.1}
   cutlerySpots:
-  - {x: -0.6, y: -0.08}
-  - {x: 0.6, y: -0.08}
+  - {x: -0.8, y: -0.08}
+  - {x: 0.8, y: -0.08}
+  cutlerySize: 0.6
 --- !u!210 &1061454718
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -10654,11 +10658,12 @@ MonoBehaviour:
   - {x: -0.42, y: 0.16}
   - {x: 0.42, y: 0.16}
   plateSpots:
-  - {x: -0.26, y: -0.1}
-  - {x: 0.26, y: -0.1}
+  - {x: -0.3, y: -0.1}
+  - {x: 0.3, y: -0.1}
   cutlerySpots:
-  - {x: -0.6, y: -0.08}
-  - {x: 0.6, y: -0.08}
+  - {x: -0.8, y: -0.08}
+  - {x: 0.8, y: -0.08}
+  cutlerySize: 0.6
 --- !u!210 &2009476146
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -11342,11 +11347,12 @@ MonoBehaviour:
   - {x: -0.42, y: 0.16}
   - {x: 0.42, y: 0.16}
   plateSpots:
-  - {x: -0.26, y: -0.1}
-  - {x: 0.26, y: -0.1}
+  - {x: -0.3, y: -0.1}
+  - {x: 0.3, y: -0.1}
   cutlerySpots:
-  - {x: -0.6, y: -0.08}
-  - {x: 0.6, y: -0.08}
+  - {x: -0.8, y: -0.08}
+  - {x: 0.8, y: -0.08}
+  cutlerySize: 0.6
 --- !u!210 &2101356918
 SortingGroup:
   m_ObjectHideFlags: 0

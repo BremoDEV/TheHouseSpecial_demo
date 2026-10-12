@@ -123,6 +123,11 @@ public static partial class DemoSceneBuilder
             Set(t, "cleanPlateSprite", clean);
             Set(t, "dirtyPlateSprite", dirty);
             Set(t, "cutlerySprite", LoadArt(CutlerySprite));
+            // Sitios de cada cosa en la mesa: cubiertos por fuera, plato en medio, bebida detrás
+            SetVector2Array(t, "plateSpots", new Vector2(-0.3f, -0.1f), new Vector2(0.3f, -0.1f));
+            SetVector2Array(t, "cutlerySpots", new Vector2(-0.8f, -0.08f), new Vector2(0.8f, -0.08f));
+            SetVector2Array(t, "drinkSpots", new Vector2(-0.42f, 0.16f), new Vector2(0.42f, 0.16f));
+            Set(t, "cutlerySize", 0.6f);
             Set(t, "itemSize", 0.75f);
         }
 
@@ -168,6 +173,16 @@ public static partial class DemoSceneBuilder
             }
             sso.ApplyModifiedPropertiesWithoutUndo();
         }
+    }
+
+    private static void SetVector2Array(Object target, string field, params Vector2[] values)
+    {
+        var so = new SerializedObject(target);
+        var p = so.FindProperty(field);
+        if (p == null) return;
+        p.arraySize = values.Length;
+        for (int i = 0; i < values.Length; i++) p.GetArrayElementAtIndex(i).vector2Value = values[i];
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // Cambia el dibujo de un objeto de la escena (p. ej. la caja de cubiertos) y lo deja de 'width' unidades de ancho
