@@ -29,6 +29,8 @@ public class Table : Interactable
     [SerializeField] private Color emptyColor = Color.white;
     [SerializeField] private Color occupiedColor = new Color(0.6f, 0.8f, 1f);
     [SerializeField] private Color dirtyColor = new Color(0.55f, 0.4f, 0.25f);
+    [Tooltip("Si está activo, la mesa cambia de color según su estado (ocupada, sucia). Con el dibujo de la mesa va desactivado: la suciedad se ve por los platos sucios.")]
+    [SerializeField] private bool tintByState = true;
 
     [Header("Platos y bebidas encima de la mesa")]
     [Tooltip("Cubiertos en servilleta: aparecen delante de cada cliente al poner la mesa")]
@@ -217,6 +219,11 @@ public class Table : Interactable
     private void UpdateVisual()
     {
         if (tableRenderer == null) return;
+        if (!tintByState)
+        {
+            tableRenderer.color = Color.white;
+            return;
+        }
         tableRenderer.color = state switch
         {
             TableState.Occupied => occupiedColor,

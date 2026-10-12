@@ -54,6 +54,10 @@ public static partial class DemoSceneBuilder
     private const string CutlerySprite = "sprite_Cubiertos";           // en la mano y en la mesa
     private const string MenuBoxSprite = "sprite_Caja_Cartas";         // al final de la barra larga
     private const string MenuSprite = "sprite_Carta";                  // en la mano
+    private const string TpvSprite = "sprite_TPV";                     // arriba a la derecha
+    private const float TpvWidth = 1.6f;
+    private const string StoreroomDoorSprite = "sprite_Puerta_trastero"; // arriba, al lado de la TPV
+    private const float StoreroomDoorWidth = 1.7f; // ancho del PNG entero (la puerta es la mitad: 0.85)
     // Centro del cuerpo de la nube dentro del dibujo (para que el producto quede en medio y las burbujitas debajo)
     private static readonly Vector2 CloudPivot = new Vector2(0.5f, 0.5625f);
 
@@ -141,11 +145,12 @@ public static partial class DemoSceneBuilder
             Set(t, "dirtyPlateSprite", dirty);
             Set(t, "cutlerySprite", LoadArt(CutlerySprite));
             // Sitios de cada cosa en la mesa: cubiertos por fuera, plato en medio, bebida detrás
-            SetVector2Array(t, "plateSpots", new Vector2(-0.3f, -0.1f), new Vector2(0.3f, -0.1f));
-            SetVector2Array(t, "cutlerySpots", new Vector2(-0.8f, -0.08f), new Vector2(0.8f, -0.08f));
-            SetVector2Array(t, "drinkSpots", new Vector2(-0.42f, 0.16f), new Vector2(0.42f, 0.16f));
-            Set(t, "cutlerySize", 0.6f);
-            Set(t, "itemSize", 0.75f);
+            SetVector2Array(t, "plateSpots", new Vector2(-0.3f, -0.05f), new Vector2(0.3f, -0.05f));
+            SetVector2Array(t, "cutlerySpots", new Vector2(-0.64f, -0.05f), new Vector2(0.64f, -0.05f));
+            SetVector2Array(t, "drinkSpots", new Vector2(-0.42f, 0.22f), new Vector2(0.42f, 0.22f));
+            Set(t, "cutlerySize", 0.5f);
+            Set(t, "itemSize", 0.7f);
+            ApplyTableArt(t);
         }
 
         // 5) Pila de platos sucios en la mano de la camarera
@@ -160,6 +165,29 @@ public static partial class DemoSceneBuilder
         // 5b) Caja de cubiertos (esquina de la L) y caja de cartas (final de la barra larga)
         SetObjectArt("Cubiertos", LoadArt(CutleryBoxSprite), 0.85f);
         SetObjectArt("Cartas", LoadArt(MenuBoxSprite), 0.8f);
+        // TPV con dibujo y sin la etiqueta de texto
+        if (LoadArt(TpvSprite) != null)
+        {
+            SetObjectArt("TPV", LoadArt(TpvSprite), TpvWidth);
+            HideLabel("TPV");
+        }
+        // Puerta del trastero con dibujo y sin la etiqueta de texto
+        if (LoadArt(StoreroomDoorSprite) != null)
+        {
+            SetObjectArt("Trastero", LoadArt(StoreroomDoorSprite), StoreroomDoorWidth);
+            // La puerta ocupa la mitad central del PNG: el clic solo en la puerta, no en lo transparente de los lados
+            var door = GameObject.Find("Trastero");
+            var doorBox = door != null ? door.GetComponent<BoxCollider2D>() : null;
+            if (doorBox != null) doorBox.size = new Vector2(doorBox.size.x * 0.5f, doorBox.size.y);
+            // El borde de abajo de la puerta, justo donde acaba la pared (donde empieza el suelo)
+            if (door != null)
+            {
+                var p = door.transform.position;
+                float height = LoadArt(StoreroomDoorSprite).bounds.size.y * door.transform.localScale.y;
+                door.transform.position = new Vector3(p.x, TopWallBottom + height / 2f, p.z);
+            }
+            HideLabel("TRASTERO");
+        }
 
         // 6) Bocadillos de pedido en forma de nube (en el prefab de los clientes)
         Sprite cloud = LoadArt(CloudSprite);
@@ -198,6 +226,9 @@ public static partial class DemoSceneBuilder
             }
             sso.ApplyModifiedPropertiesWithoutUndo();
         }
+
+        // 7a) Barra en L y suelo de la cocina con dibujo
+        ApplyBarArt();
 
         // 7b) Cartel "PLS WAIT" al principio de la cola (sustituye a la etiqueta COLA)
         PlaceWaitSign();
@@ -263,12 +294,171 @@ public static partial class DemoSceneBuilder
         sr.sortingOrder = 0;
 
         // Fuera la etiqueta de texto "COLA"
+        HideLabel("COLA");
+    }
+
+    // Oculta una etiqueta de texto del suelo (Etiqueta_XXX). No la borra, por si se quiere recuperar.
+    private static void HideLabel(string key)
+    {
         foreach (TMPro.TextMeshPro t in Object.FindObjectsByType<TMPro.TextMeshPro>(FindObjectsInactive.Include))
         {
             if (!t.name.StartsWith("Etiqueta_")) continue;
-            if (t.name.ToUpper().Contains("COLA") || t.text.ToUpper() == "COLA")
+            if (t.name.ToUpper() == "ETIQUETA_" + key || t.text.ToUpper() == key)
                 t.gameObject.SetActive(false);
         }
+    }
+
+    // Mesa con dibujo: sustituye el rectángulo blanco. No cambia de color; la suciedad se ve por los platos sucios.
+    private const string TableSprite = "sprite_MesaCliente";
+    private const float TableArtWidth = 1.6f;
+    // El tablero ocupa la parte de arriba del dibujo (el mantel y las patas van debajo):
+    // se baja el dibujo para que el tablero quede donde van los platos y las bebidas.
+    private const float TableArtOffsetY = -0.3f;
+
+    private static void ApplyTableArt(Table t)
+    {
+        Sprite mesa = LoadArt(TableSprite);
+        if (mesa == null) return;
+        var so = new SerializedObject(t);
+        var sr = so.FindProperty("tableRenderer").objectReferenceValue as SpriteRenderer;
+        so.FindProperty("tintByState").boolValue = false;
+        so.ApplyModifiedPropertiesWithoutUndo();
+        if (sr == null) return;
+
+        Undo.RecordObject(sr, "Aplicar arte");
+        Undo.RecordObject(sr.transform, "Aplicar arte");
+        sr.sprite = mesa;
+        sr.color = Color.white;
+        float scale = TableArtWidth / Mathf.Max(0.01f, mesa.bounds.size.x);
+        sr.transform.localScale = new Vector3(scale, scale, 1f);
+        sr.transform.localPosition = new Vector3(0f, TableArtOffsetY, 0f);
+
+        // El collider (clic y obstáculo) cubre el tablero, sin las patas
+        var box = t.GetComponent<BoxCollider2D>();
+        if (box != null)
+        {
+            Undo.RecordObject(box, "Aplicar arte");
+            box.size = new Vector2(TableArtWidth, 1.0f);
+            box.offset = new Vector2(0f, -0.1f);
+        }
+    }
+
+    // ---------- Barra en L con dibujo
+    // Los tres PNG son de 384x384 (una cuadrícula de 3x3 trozos) y cada uno tiene dibujado solo su trozo:
+    //   sprite_barra_comandas = parte LARGA (vertical, donde sale la comida), con la esquina arriba
+    //   sprite_barraSucios    = parte CORTA (horizontal, sucios y sobras): encimera + frente
+    //   Sprite_barra_suelo    = suelo de la cocina
+    // Se recorta cada trozo (lo transparente fuera) y se estira al tamaño de la barra del juego.
+    // Escala: el ancho de la barra larga (64 píxeles del dibujo) = BarWidth del juego.
+    private const string BarLongSprite = "sprite_barra_comandas";
+    private const string BarShortSprite = "sprite_barraSucios";
+    private const string KitchenFloorSprite = "Sprite_barra_suelo";
+    private const float BarArtLongWidthPx = 64f;
+    private const float BarArtCornerPx = 64f; // la esquina de arriba de la barra larga (no se repite)
+
+    private static void ApplyBarArt()
+    {
+        float ppu = BarArtLongWidthPx / BarWidth;
+        Sprite longBar = CroppedSprite(BarLongSprite, ppu, new Vector4(0f, 0f, 0f, BarArtCornerPx));
+        Sprite shortBar = CroppedSprite(BarShortSprite, ppu, Vector4.zero);
+        Sprite floor = CroppedSprite(KitchenFloorSprite, ppu, Vector4.zero);
+        if (longBar == null || shortBar == null || floor == null) return;
+
+        float left = BarX - BarWidth / 2f;   // borde izquierdo de la barra larga
+        float right = BarX + BarWidth / 2f;  // donde empieza la cocina
+        const float screenRight = 10.67f, screenBottom = -6f;
+
+        // Parte larga: de arriba de la L hasta abajo. La esquina se queda arriba y el resto se repite.
+        ArtPiece("Arte_BarraLarga", longBar, new Vector2(left, BarTop),
+            new Vector2(BarWidth, BarTop - screenBottom), SpriteDrawMode.Tiled, -5);
+        // Parte corta: desde la barra larga hasta el borde de la pantalla (encimera + frente)
+        float shortHeight = shortBar.bounds.size.y;
+        ArtPiece("Arte_BarraCorta", shortBar, new Vector2(right, BarTop),
+            new Vector2(screenRight - right, shortHeight), SpriteDrawMode.Tiled, -5);
+        // Suelo de la cocina: debajo del frente de la barra corta
+        float floorTop = BarTop - shortHeight;
+        ArtPiece("Arte_SueloCocina", floor, new Vector2(right, floorTop),
+            new Vector2(screenRight - right, floorTop - screenBottom), SpriteDrawMode.Sliced, -90);
+
+        // Los rectángulos de color de antes se esconden (sus colliders se quedan: siguen chocando y se pueden clicar)
+        foreach (string n in new[] { "Barra", "Barra_Sucios", "SueloCocina" })
+        {
+            var go = GameObject.Find(n);
+            var sr = go != null ? go.GetComponent<SpriteRenderer>() : null;
+            if (sr == null) continue;
+            Undo.RecordObject(sr, "Aplicar arte");
+            sr.enabled = false;
+        }
+    }
+
+    // Crea (o actualiza) un objeto con el dibujo, con su esquina de arriba a la izquierda en 'topLeft'
+    private static void ArtPiece(string name, Sprite sprite, Vector2 topLeft, Vector2 size, SpriteDrawMode mode, int order)
+    {
+        GameObject go = GameObject.Find(name);
+        if (go == null)
+        {
+            go = new GameObject(name);
+            Undo.RegisterCreatedObjectUndo(go, "Aplicar arte");
+            go.AddComponent<SpriteRenderer>();
+        }
+        go.transform.position = new Vector3(topLeft.x, topLeft.y, 0f);
+        go.transform.localScale = Vector3.one;
+        var sr = go.GetComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.color = Color.white;
+        sr.drawMode = mode;
+        if (mode == SpriteDrawMode.Tiled) sr.tileMode = SpriteTileMode.Continuous;
+        sr.size = size;
+        sr.sortingOrder = order;
+        if (spriteMaterial == null) LoadSpriteMaterial();
+        if (spriteMaterial != null) sr.sharedMaterial = spriteMaterial;
+    }
+
+    // Recorta la parte dibujada de un PNG y la guarda como sprite propio (en Assets/Demo/Sprites),
+    // con el punto de anclaje arriba a la izquierda y bordes para la esquina.
+    private static Sprite CroppedSprite(string fileName, float ppu, Vector4 border)
+    {
+        Sprite source = LoadArt(fileName);
+        if (source == null) return null;
+        string texPath = AssetDatabase.GetAssetPath(source.texture);
+        var importer = AssetImporter.GetAtPath(texPath) as TextureImporter;
+        if (importer != null && !importer.isReadable)
+        {
+            importer.isReadable = true;
+            importer.SaveAndReimport();
+        }
+        var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(texPath);
+        if (tex == null) return null;
+
+        // Rectángulo con píxeles visibles (Unity cuenta desde abajo a la izquierda)
+        Color32[] px = tex.GetPixels32();
+        int w = tex.width, h = tex.height, minX = w, minY = h, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+                if (px[y * w + x].a > 10)
+                {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+        if (maxX < 0) return null;
+        var rect = new Rect(minX, minY, maxX - minX + 1, maxY - minY + 1);
+
+        var sprite = Sprite.Create(tex, rect, new Vector2(0f, 1f), ppu, 0, SpriteMeshType.FullRect, border);
+        sprite.name = fileName + "_recorte";
+        string outPath = SpritesFolder + "/" + fileName + "_recorte.asset";
+        var old = AssetDatabase.LoadAssetAtPath<Sprite>(outPath);
+        if (old != null)
+        {
+            EditorUtility.CopySerialized(sprite, old);
+            EditorUtility.SetDirty(old);
+            AssetDatabase.SaveAssets();
+            return old;
+        }
+        AssetDatabase.CreateAsset(sprite, outPath);
+        AssetDatabase.SaveAssets();
+        return sprite;
     }
 
     private static void SetChildY(Transform parent, string child, float y)
