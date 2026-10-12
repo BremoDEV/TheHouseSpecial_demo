@@ -276,6 +276,48 @@ public static partial class DemoSceneBuilder
     // ------------------------------------------------------------------ ARTE DEL MENÚ
 
     private const string MenuArtFolder = "Assets/Arte/Menu";
+    // Botones, libretas, caja de diálogo, tablet de la TPV... (todo lo que es interfaz)
+    private const string UiArtFolder = "Assets/Arte/UI";
+
+    // Dibujos de interfaz que van en Assets/Arte/UI (antes estaban en Assets/Arte/Menu)
+    private static readonly string[] UiArtFiles =
+    {
+        "menu_comanda_tutorial", "menu_comanda_jugar", "menu_comanda_salir",
+        "menu_comanda_continuar", "menu_comanda_reiniciar", "menu_comanda_saltar",
+        "menu_libreta", "menu_libreta_pausa", "menu_libreta_tutorial",
+        "tpv_tablet", "tpv_brillo", "ui_boton", "ui_panel",
+    };
+
+    // Ruta de un dibujo del menú o de la interfaz: primero mira en Arte/UI y si no, en Arte/Menu
+    private static string MenuArtPath(string fileName)
+    {
+        string ui = UiArtFolder + "/" + fileName + ".png";
+        if (AssetImporter.GetAtPath(ui) != null) return ui;
+        return MenuArtFolder + "/" + fileName + ".png";
+    }
+
+    // Mueve los dibujos de interfaz a Assets/Arte/UI. Se mueven con Unity, así las escenas no pierden nada.
+    [UnityEditor.MenuItem("Tools/The House Special/Ordenar: mover arte de interfaz a Arte-UI")]
+    public static void MoveUiArtMenu()
+    {
+        if (!AssetDatabase.IsValidFolder(UiArtFolder)) AssetDatabase.CreateFolder("Assets/Arte", "UI");
+        int moved = 0;
+        var errors = new List<string>();
+        foreach (string f in UiArtFiles)
+        {
+            string from = MenuArtFolder + "/" + f + ".png";
+            string to = UiArtFolder + "/" + f + ".png";
+            if (AssetImporter.GetAtPath(from) == null) continue; // ya movido o no existe
+            string error = AssetDatabase.MoveAsset(from, to);
+            if (string.IsNullOrEmpty(error)) moved++;
+            else errors.Add(f + ": " + error);
+        }
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("Arte de interfaz",
+            $"Movidos {moved} dibujos a {UiArtFolder}." +
+            (errors.Count > 0 ? "\n\nProblemas:\n" + string.Join("\n", errors) : "") +
+            "\n\nLas escenas siguen funcionando igual (Unity actualiza las referencias solo).", "Vale");
+    }
 
     // Letra "Nothing You Could Do" (la de la libreta del menú) como fuente de TextMeshPro.
     // La crea la primera vez a partir del .ttf de Assets/Arte/Menu.
@@ -284,35 +326,57 @@ public static partial class DemoSceneBuilder
 
     private static TMP_FontAsset GetHandwritingFont()
     {
-        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(HandFontAssetPath);
+        return GetFontAsset(HandFontFile, HandFontAssetPath, "NothingYouCouldDo");
+    }
+
+    // Crea (la primera vez) una fuente de TextMeshPro a partir de un .ttf del proyecto
+    private static TMP_FontAsset GetFontAsset(string ttfPath, string assetPath, string baseName)
+    {
+        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
         if (existing != null) return existing;
 
-        var font = AssetDatabase.LoadAssetAtPath<Font>(HandFontFile);
+        var font = AssetDatabase.LoadAssetAtPath<Font>(ttfPath);
         if (font == null)
         {
-            Debug.LogWarning("[Tutorial] No encuentro " + HandFontFile + ". Uso la letra normal.");
+            Debug.LogWarning("[Fuentes] No encuentro " + ttfPath + ". Uso la letra normal.");
             return null;
         }
         var asset = TMP_FontAsset.CreateFontAsset(font, 90, 9, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,
             1024, 1024, AtlasPopulationMode.Dynamic, false);
         if (asset == null) return null;
-        asset.name = "NothingYouCouldDo SDF";
-        AssetDatabase.CreateAsset(asset, HandFontAssetPath);
-        asset.atlasTextures[0].name = "NothingYouCouldDo Atlas";
+        asset.name = baseName + " SDF";
+        AssetDatabase.CreateAsset(asset, assetPath);
+        asset.atlasTextures[0].name = baseName + " Atlas";
         AssetDatabase.AddObjectToAsset(asset.atlasTextures[0], asset);
-        asset.material.name = "NothingYouCouldDo Material";
+        asset.material.name = baseName + " Material";
         AssetDatabase.AddObjectToAsset(asset.material, asset);
         // Todas las letras del castellano ya guardadas (por si en la build no se pudieran generar)
         asset.TryAddCharacters(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
-                               "¡¿áéíóúüñÁÉÍÓÚÜÑ€ºª«»…·");
+                               "¡¿áéíóúüñÁÉÍÓÚÜÑ€ºª«»…·×");
         EditorUtility.SetDirty(asset);
         AssetDatabase.SaveAssets();
         return asset;
     }
 
+    // Dibujo de interfaz que se estira sin deformar las esquinas (9-slice): 'border' píxeles por cada lado
+    private static Sprite LoadUiSprite(string fileName, float border)
+    {
+        string path = MenuArtPath(fileName);
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        if (importer == null) return null;
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Single;
+        importer.filterMode = FilterMode.Bilinear;
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.mipmapEnabled = false;
+        importer.spriteBorder = new Vector4(border, border, border, border);
+        importer.SaveAndReimport();
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+    }
+
     private static Sprite LoadMenuSprite(string fileName, bool readable)
     {
-        string path = MenuArtFolder + "/" + fileName + ".png";
+        string path = MenuArtPath(fileName);
         var importer = AssetImporter.GetAtPath(path) as TextureImporter;
         if (importer == null)
         {

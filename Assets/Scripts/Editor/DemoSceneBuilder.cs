@@ -985,6 +985,11 @@ public static partial class DemoSceneBuilder
     // ------------------------------------------------------------------ PANEL DEL TPV (versión con comanda)
 
     private static readonly Color TpvGreen = new Color(0.25f, 0.65f, 0.3f);
+    // Letra de la TPV: Outfit (Google Fonts, licencia libre OFL), en Assets/Arte/Menu
+    private const string TpvFontBold = "Assets/Arte/Menu/Outfit-Bold.ttf";
+    private const string TpvFontBoldAsset = "Assets/Arte/Menu/Outfit-Bold SDF.asset";
+    private const string TpvFontRegular = "Assets/Arte/Menu/Outfit-Regular.ttf";
+    private const string TpvFontRegularAsset = "Assets/Arte/Menu/Outfit-Regular SDF.asset";
     private static readonly Color TpvBlue = new Color(0.25f, 0.5f, 0.95f);
     private static readonly Color TpvRed = new Color(0.75f, 0.2f, 0.2f);
     private static readonly Color TpvGrey = new Color(0.4f, 0.4f, 0.45f);
@@ -1017,24 +1022,114 @@ public static partial class DemoSceneBuilder
         Transform r = root.transform;
         var center = new Vector2(0.5f, 0.5f);
 
-        // Fondo más translúcido
+        // La TPV como una tablet: carcasa negra y pantalla azul (Assets/Arte/UI/tpv_tablet.png)
+        // Medidas de la pantalla (respecto al centro): x de -490 a 490, y de -280 a 280
+        var rootRt = (RectTransform)r;
+        rootRt.sizeDelta = new Vector2(1160f, 700f); // el dibujo lleva 30 de sombra por cada lado
         var bg = root.GetComponent<Image>();
-        if (bg != null) bg.color = new Color(0.08f, 0.08f, 0.12f, 0.72f);
+        Sprite tablet = AssetImporter.GetAtPath(MenuArtPath("tpv_tablet")) != null
+            ? LoadMenuSprite("tpv_tablet", false) : null;
+        if (bg != null)
+        {
+            if (tablet != null) { bg.sprite = tablet; bg.color = Color.white; }
+            else bg.color = new Color(0.08f, 0.08f, 0.12f, 0.9f);
+        }
 
         // Fuera los botones viejos (y los nuevos si ya se había actualizado antes)
-        foreach (string n in new[] { "BtnCuenta", "BtnCerrar", "BtnPedir", "BtnBorrar", "Comanda" })
+        foreach (string n in new[] { "BtnCuenta", "BtnCerrar", "BtnPedir", "BtnBorrar", "Comanda", "CajaProductos", "BrilloPantalla" })
         {
             Transform old = r.Find(n);
             if (old != null) Object.DestroyImmediate(old.gameObject);
         }
 
-        var selection = MakeText("Comanda", r, "Pulsa los productos para apuntarlos en la comanda", 30f, Color.white);
-        Place(selection.gameObject, center, new Vector2(0f, -105f), new Vector2(840f, 60f));
+        var ink = new Color(0.06f, 0.12f, 0.22f); // azul oscuro, se lee bien sobre la pantalla azul
 
-        var bill = MakeButton("BtnCuenta", r, "Cuenta", center, new Vector2(-300f, -215f), new Vector2(200f, 70f), TpvBlue, 30f);
-        var clear = MakeButton("BtnBorrar", r, "Borrar", center, new Vector2(-70f, -215f), new Vector2(160f, 70f), TpvGrey, 28f);
-        var order = MakeButton("BtnPedir", r, "Pedir", center, new Vector2(225f, -215f), new Vector2(320f, 90f), TpvGreen, 42f);
-        var close = MakeButton("BtnCerrar", r, "X", new Vector2(1f, 1f), new Vector2(-45f, -45f), new Vector2(70f, 70f), TpvRed, 40f);
+        // Cabecera de la pantalla: "TPV" a la izquierda, ocupación de la barra a la derecha y la X en la esquina
+        var title = r.Find("Titulo");
+        if (title != null)
+        {
+            Place(title.gameObject, center, new Vector2(-380f, 248f), new Vector2(200f, 44f));
+            var t = title.GetComponent<TMP_Text>();
+            t.fontSize = 30f; t.color = Color.white; t.alignment = TextAlignmentOptions.MidlineLeft;
+        }
+        var status = so.FindProperty("statusText").objectReferenceValue as TMP_Text;
+        if (status != null)
+        {
+            var srt = status.rectTransform;
+            Place(status.gameObject, center, new Vector2(400f, 248f), new Vector2(400f, 40f));
+            srt.pivot = new Vector2(1f, 0.5f); // si se ensancha, crece hacia la izquierda
+            status.fontSize = 24f; status.color = Color.white; status.alignment = TextAlignmentOptions.MidlineRight;
+        }
+
+        // Zona grande: los productos dentro de un recuadro claro
+        var box = UI("CajaProductos", r);
+        Place(box, center, new Vector2(0f, 88f), new Vector2(940f, 270f));
+        var boxImg = box.AddComponent<Image>();
+        boxImg.color = new Color(0.9f, 0.96f, 1f, 0.95f);
+        boxImg.raycastTarget = false;
+        var outline = box.AddComponent<Outline>();
+        outline.effectColor = new Color(0.03f, 0.05f, 0.1f);
+        outline.effectDistance = new Vector2(2f, -2f);
+        var container = so.FindProperty("buttonContainer").objectReferenceValue as Transform;
+        if (container != null)
+        {
+            Place(container.gameObject, center, new Vector2(0f, 88f), new Vector2(900f, 250f));
+            box.transform.SetSiblingIndex(container.GetSiblingIndex()); // el recuadro, detrás de los botones
+        }
+        so.FindProperty("rowsRaise").floatValue = 0f;
+
+        var selection = MakeText("Comanda", r, "Pulsa los productos para apuntarlos en la comanda", 28f, ink);
+        Place(selection.gameObject, center, new Vector2(0f, -95f), new Vector2(940f, 50f));
+
+        // Abajo, los tres botones iguales (mismos colores de siempre)
+        var bill = MakeButton("BtnCuenta", r, "Cuenta", center, new Vector2(-315f, -205f), new Vector2(290f, 80f), TpvBlue, 34f);
+        var clear = MakeButton("BtnBorrar", r, "Borrar", center, new Vector2(0f, -205f), new Vector2(290f, 80f), TpvGrey, 34f);
+        var order = MakeButton("BtnPedir", r, "Pedir", center, new Vector2(315f, -205f), new Vector2(290f, 80f), TpvGreen, 38f);
+        var close = MakeButton("BtnCerrar", r, "X", center, new Vector2(455f, 248f), new Vector2(50f, 50f), TpvRed, 30f);
+
+        // Aspecto de app: botones redondeados con canto, recuadro redondeado y letra de interfaz (Outfit)
+        Sprite uiButton = LoadUiSprite("ui_boton", 32f);
+        Sprite uiPanel = LoadUiSprite("ui_panel", 28f);
+        TMP_FontAsset uiBold = GetFontAsset(TpvFontBold, TpvFontBoldAsset, "Outfit-Bold");
+        TMP_FontAsset uiRegular = GetFontAsset(TpvFontRegular, TpvFontRegularAsset, "Outfit-Regular");
+        foreach (Button b in new[] { bill, clear, order, close })
+        {
+            var img = b.GetComponent<Image>();
+            if (uiButton != null)
+            {
+                img.sprite = uiButton;
+                img.type = Image.Type.Sliced;
+                img.pixelsPerUnitMultiplier = b == close ? 3f : 1.6f;
+            }
+            var label = b.GetComponentInChildren<TMP_Text>();
+            if (uiBold != null) label.font = uiBold;
+            label.rectTransform.offsetMin = new Vector2(4f, 8f); // el texto un poco más arriba (el canto ocupa abajo)
+        }
+        if (uiPanel != null)
+        {
+            boxImg.sprite = uiPanel;
+            boxImg.type = Image.Type.Sliced;
+            boxImg.pixelsPerUnitMultiplier = 1.2f;
+            Object.DestroyImmediate(outline);
+        }
+        if (uiBold != null && title != null) title.GetComponent<TMP_Text>().font = uiBold;
+        if (uiRegular != null)
+        {
+            if (status != null) status.font = uiRegular;
+            selection.font = uiRegular;
+        }
+        // Reflejo de luz encima de toda la pantalla (muy translúcido, no bloquea los clics)
+        if (AssetImporter.GetAtPath(MenuArtPath("tpv_brillo")) != null)
+        {
+            var glare = UI("BrilloPantalla", r);
+            Place(glare, center, Vector2.zero, new Vector2(980f, 560f));
+            var glareImg = glare.AddComponent<Image>();
+            glareImg.sprite = LoadMenuSprite("tpv_brillo", false);
+            glareImg.raycastTarget = false;
+            glare.transform.SetAsLastSibling();
+        }
+        so.FindProperty("buttonSprite").objectReferenceValue = uiButton;
+        so.FindProperty("uiFont").objectReferenceValue = uiBold;
 
         so.FindProperty("billButton").objectReferenceValue = bill;
         so.FindProperty("closeButton").objectReferenceValue = close;

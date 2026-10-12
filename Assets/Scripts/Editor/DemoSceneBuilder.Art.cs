@@ -43,6 +43,7 @@ public static partial class DemoSceneBuilder
         ("Zorra", "NPC_4_Zorra"),
     };
     private const string WaitressSprite = "MainChar_Haiki";
+    private const string CookSprite = "NPC_Especial_Cocinero";
     // Alto del dibujo de los personajes en unidades (PNG de 128x256 contando el hueco transparente)
     private const float CharacterArtHeight = 1.6f;
 
@@ -94,7 +95,7 @@ public static partial class DemoSceneBuilder
         foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            if (path.StartsWith(ArtFolder + "/Menu/")) continue;
+            if (path.StartsWith(ArtFolder + "/Menu/") || path.StartsWith(ArtFolder + "/UI/")) continue;
             ConfigurePixelArt(path);
         }
 
@@ -169,6 +170,9 @@ public static partial class DemoSceneBuilder
         if (LoadArt(TpvSprite) != null)
         {
             SetObjectArt("TPV", LoadArt(TpvSprite), TpvWidth);
+            // Que se ordene por altura como los personajes: la camarera, delante de la TPV (no detrás)
+            var tpvSr = GameObject.Find("TPV").GetComponent<SpriteRenderer>();
+            if (tpvSr != null) tpvSr.sortingOrder = 0;
             HideLabel("TPV");
         }
         // Puerta del trastero con dibujo y sin la etiqueta de texto
@@ -238,6 +242,32 @@ public static partial class DemoSceneBuilder
 
         // 7b) Cartel "PLS WAIT" al principio de la cola (sustituye a la etiqueta COLA)
         PlaceWaitSign();
+
+        // 7c) Cocinero con dibujo, de espaldas a la barra (la sartén mira a la derecha, hacia la cocina)
+        var cook = GameObject.Find("Cocinero");
+        Sprite cookSprite = LoadArt(CookSprite);
+        if (cook != null && cookSprite != null)
+        {
+            var csr = cook.GetComponent<SpriteRenderer>();
+            if (csr != null)
+            {
+                Undo.RecordObject(csr, "Aplicar arte");
+                Undo.RecordObject(cook.transform, "Aplicar arte");
+                csr.sprite = cookSprite;
+                csr.color = Color.white;
+                csr.flipX = true; // el dibujo mira a la izquierda: volteado mira a la derecha
+                float s = CharacterArtHeight / Mathf.Max(0.01f, cookSprite.bounds.size.y);
+                cook.transform.localScale = new Vector3(s, s, 1f);
+            }
+            var wander = cook.GetComponent<CookWander>();
+            if (wander != null)
+            {
+                var wso = new SerializedObject(wander);
+                var flip = wso.FindProperty("flipWithMovement");
+                if (flip != null) flip.boolValue = false;
+                wso.ApplyModifiedPropertiesWithoutUndo();
+            }
+        }
 
         // 8) Camarera: Haiki
         var waitress = Object.FindAnyObjectByType<WaitressController>();

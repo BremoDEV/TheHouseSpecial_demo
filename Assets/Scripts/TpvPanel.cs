@@ -42,6 +42,14 @@ public class TpvPanel : MonoBehaviour
     [Tooltip("Color de fondo de los botones con dibujo")]
     [SerializeField] private Color artButtonColor = new Color(0.93f, 0.9f, 0.84f);
 
+    [Header("Aspecto de tablet (opcional)")]
+    [Tooltip("Dibujo redondeado para los botones de productos (se estira con 9-slice)")]
+    [SerializeField] private Sprite buttonSprite;
+    [Tooltip("Cuánto se encogen las esquinas redondeadas del dibujo (más = esquinas más pequeñas)")]
+    [SerializeField] private float buttonCornerScale = 1.5f;
+    [Tooltip("Letra de los botones de productos (los que no tienen dibujo)")]
+    [SerializeField] private TMP_FontAsset uiFont;
+
     private WaitressController waitress;
     private readonly List<MenuItem> selection = new List<MenuItem>();
 
@@ -91,6 +99,13 @@ public class TpvPanel : MonoBehaviour
 
             TMP_Text label = b.GetComponentInChildren<TMP_Text>();
             if (label != null) label.text = item.displayName;
+            if (label != null && uiFont != null) label.font = uiFont;
+            if (buttonSprite != null && b.image != null)
+            {
+                b.image.sprite = buttonSprite;
+                b.image.type = Image.Type.Sliced;
+                b.image.pixelsPerUnitMultiplier = buttonCornerScale;
+            }
 
             if (item.icon != null)
             {
