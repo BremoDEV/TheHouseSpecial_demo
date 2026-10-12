@@ -58,6 +58,7 @@ public class CounterItem : Interactable
         {
             transform.localScale *= artScale;
             if (label != null) label.gameObject.SetActive(false);
+            foreach (TMP_Text t in GetComponentsInChildren<TMP_Text>(true)) t.gameObject.SetActive(false);
         }
         UpdateTimerVisual();
     }

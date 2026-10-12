@@ -32,8 +32,10 @@ public class StoreroomManager : MonoBehaviour
     [Header("Descanso (editable por diseño)")]
     [Tooltip("Ira que baja por segundo mientras descansas")]
     [SerializeField] private float restRagePerSecond = 8f;
-    [Tooltip("Si está activo, sale sola del trastero cuando la ira llega a 0")]
+    [Tooltip("Si está activo, sale sola del trastero cuando la ira llega a 0 (si entró sin ira, se queda hasta que hagas clic)")]
     [SerializeField] private bool autoExitWhenCalm = true;
+
+    private bool restHadRage; // si al entrar (o durante el descanso) tenía ira que bajar
 
     public bool IsKilling { get; private set; }
     public bool IsResting { get; private set; }
@@ -71,8 +73,10 @@ public class StoreroomManager : MonoBehaviour
 
         if (IsResting && !IsKilling && RageMeter.Instance != null)
         {
+            if (RageMeter.Instance.Current > 0f) restHadRage = true;
             RageMeter.Instance.ReduceRage(restRagePerSecond * Time.deltaTime);
-            if (autoExitWhenCalm && RageMeter.Instance.Current <= 0f) StopRest();
+            // Antes salía al momento si entraba con la ira a 0 (parecía que no te dejaba entrar)
+            if (autoExitWhenCalm && restHadRage && RageMeter.Instance.Current <= 0f) StopRest();
         }
     }
 
@@ -82,6 +86,7 @@ public class StoreroomManager : MonoBehaviour
     {
         if (IsKilling || IsResting) return;
         IsResting = true;
+        restHadRage = false;
         waitress.SetVisible(false);
         Debug.Log("La camarera entra al trastero a respirar...");
     }

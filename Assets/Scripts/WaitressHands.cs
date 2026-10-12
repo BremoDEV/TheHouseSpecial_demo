@@ -146,14 +146,18 @@ public class WaitressHands : MonoBehaviour
 
             HeldItem item = slots[i];
             r.enabled = item != null;
+            Sprite icon = null;
+            Color color = Color.white;
+            if (item != null) GetLook(item, out icon, out color);
+
+            // El nombre solo sale si no hay dibujo (p. ej. la cuenta); con dibujo basta el dibujo
             if (handLabels != null && i < handLabels.Length && handLabels[i] != null)
             {
-                handLabels[i].enabled = item != null;
+                handLabels[i].enabled = item != null && icon == null;
                 if (item != null) handLabels[i].text = LabelFor(item);
             }
             if (item == null) continue;
 
-            GetLook(item, out Sprite icon, out Color color);
             if (icon != null)
             {
                 // Dibujo: sin teñir y escalado para que mida 'artSize'

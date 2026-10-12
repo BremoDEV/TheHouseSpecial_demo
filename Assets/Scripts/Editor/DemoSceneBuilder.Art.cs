@@ -183,6 +183,9 @@ public static partial class DemoSceneBuilder
             var door = GameObject.Find("Trastero");
             var doorBox = door != null ? door.GetComponent<BoxCollider2D>() : null;
             if (doorBox != null) doorBox.size = new Vector2(doorBox.size.x * 0.5f, doorBox.size.y);
+            // Que se ordene por altura: la camarera, delante de la puerta (no detrás)
+            var doorSr = door != null ? door.GetComponent<SpriteRenderer>() : null;
+            if (doorSr != null) doorSr.sortingOrder = 0;
             // El borde de abajo de la puerta, justo donde acaba la pared (donde empieza el suelo)
             if (door != null)
             {
