@@ -19,6 +19,8 @@ public static partial class DemoSceneBuilder
     private static readonly (string name, ItemCategory category, string sprite, Color color)[] Products =
     {
         ("Agua", ItemCategory.Drink, "sprite_Agua", new Color(0.55f, 0.85f, 1f)),
+        ("Refresco", ItemCategory.Drink, "sprite_Refresco", new Color(0.95f, 0.25f, 0.25f)),
+        ("Cerveza", ItemCategory.Drink, "sprite_Cerveza", new Color(1f, 0.8f, 0.2f)),
         ("Vino", ItemCategory.Drink, "sprite_Vino", new Color(0.6f, 0.2f, 0.55f)),
         ("Brochetas de carne", ItemCategory.Food, "sprite_carne1", new Color(0.6f, 0.3f, 0.2f)),
         ("Pollo asado", ItemCategory.Food, "sprite_pollo1", new Color(0.85f, 0.5f, 0.2f)),
@@ -35,6 +37,10 @@ public static partial class DemoSceneBuilder
     private const string DirtyPlateSprite = "sprite_platoSucio";
     private const string DirtyStackSprite = "sprite_platosSucios";
     private const string CloudSprite = "sprite_bocadillo_nube";
+    private const string CutleryBoxSprite = "sprite_Caja_Cubiertos";   // en la esquina de la barra
+    private const string CutlerySprite = "sprite_Cubiertos";           // en la mano y en la mesa
+    private const string MenuBoxSprite = "sprite_Caja_Cartas";         // al final de la barra larga
+    private const string MenuSprite = "sprite_Carta";                  // en la mano
     // Centro del cuerpo de la nube dentro del dibujo (para que el producto quede en medio y las burbujitas debajo)
     private static readonly Vector2 CloudPivot = new Vector2(0.5f, 0.5625f);
 
@@ -63,6 +69,9 @@ public static partial class DemoSceneBuilder
     private static void ApplyArtToScene()
     {
         if (!AssetDatabase.IsValidFolder(ArtFolder)) return;
+
+        // 0) Borrar copias repetidas ("sprite_X 1.png" idéntico a "sprite_X.png"). Van a la papelera.
+        RemoveDuplicateArt();
 
         // 1) Importación de todos los PNG de la carpeta de arte
         foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
@@ -113,12 +122,22 @@ public static partial class DemoSceneBuilder
         {
             Set(t, "cleanPlateSprite", clean);
             Set(t, "dirtyPlateSprite", dirty);
+            Set(t, "cutlerySprite", LoadArt(CutlerySprite));
             Set(t, "itemSize", 0.75f);
         }
 
         // 5) Pila de platos sucios en la mano de la camarera
         var hands = Object.FindAnyObjectByType<WaitressHands>();
-        if (hands != null) Set(hands, "dirtyDishesIcon", LoadArt(DirtyStackSprite));
+        if (hands != null)
+        {
+            Set(hands, "dirtyDishesIcon", LoadArt(DirtyStackSprite));
+            Set(hands, "cutleryIcon", LoadArt(CutlerySprite));
+            Set(hands, "menuIcon", LoadArt(MenuSprite));
+        }
+
+        // 5b) Caja de cubiertos (esquina de la L) y caja de cartas (final de la barra larga)
+        SetObjectArt("Cubiertos", LoadArt(CutleryBoxSprite), 0.85f);
+        SetObjectArt("Cartas", LoadArt(MenuBoxSprite), 0.8f);
 
         // 6) Bocadillos de pedido en forma de nube (en el prefab de los clientes)
         Sprite cloud = LoadArt(CloudSprite);
@@ -148,6 +167,44 @@ public static partial class DemoSceneBuilder
                 if (typeName.stringValue == "Gato") typeName.stringValue = "Perro";
             }
             sso.ApplyModifiedPropertiesWithoutUndo();
+        }
+    }
+
+    // Cambia el dibujo de un objeto de la escena (p. ej. la caja de cubiertos) y lo deja de 'width' unidades de ancho
+    private static void SetObjectArt(string objectName, Sprite sprite, float width)
+    {
+        var go = GameObject.Find(objectName);
+        if (go == null || sprite == null) return;
+        var sr = go.GetComponent<SpriteRenderer>();
+        if (sr == null) return;
+        Undo.RecordObject(sr, "Aplicar arte");
+        Undo.RecordObject(go.transform, "Aplicar arte");
+        sr.sprite = sprite;
+        sr.color = Color.white;
+        sr.sortingOrder = 1;
+        float size = Mathf.Max(0.01f, sprite.bounds.size.x);
+        go.transform.localScale = new Vector3(width / size, width / size, 1f);
+        // El collider se queda del tamaño del dibujo (era un cuadrado de 1x1)
+        var box = go.GetComponent<BoxCollider2D>();
+        if (box != null) box.size = sprite.bounds.size;
+    }
+
+    // Borra "nombre 1.png" si es exactamente igual que "nombre.png" (copias al arrastrar dos veces)
+    private static void RemoveDuplicateArt()
+    {
+        string projectRoot = System.IO.Directory.GetParent(Application.dataPath).FullName;
+        foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (!path.EndsWith(" 1.png")) continue;
+            string original = path.Substring(0, path.Length - " 1.png".Length) + ".png";
+            string fullCopy = System.IO.Path.Combine(projectRoot, path);
+            string fullOriginal = System.IO.Path.Combine(projectRoot, original);
+            if (!System.IO.File.Exists(fullOriginal)) continue;
+            byte[] a = System.IO.File.ReadAllBytes(fullCopy), b = System.IO.File.ReadAllBytes(fullOriginal);
+            if (a.Length != b.Length || !System.Linq.Enumerable.SequenceEqual(a, b)) continue;
+            AssetDatabase.MoveAssetToTrash(path);
+            Debug.Log("[Arte] Copia repetida enviada a la papelera: " + path);
         }
     }
 

@@ -18,7 +18,7 @@ public class CounterItem : Interactable
     [SerializeField] private Transform timerBar;
 
     [Tooltip("Cuánto se agranda el producto cuando tiene dibujo (los dibujos llevan margen transparente)")]
-    [SerializeField] private float artScale = 1.6f;
+    [SerializeField] private float artScale = 1.45f;
 
     // Para el tutorial: mientras sea true, nada se pone malo en la barra
     public static bool SpoilPaused { get; set; }

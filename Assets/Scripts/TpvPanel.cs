@@ -32,7 +32,13 @@ public class TpvPanel : MonoBehaviour
 
     [Header("Botones con dibujo")]
     [Tooltip("Tamaño de cada botón cuando los productos tienen dibujo")]
-    [SerializeField] private Vector2 artButtonSize = new Vector2(170f, 130f);
+    [SerializeField] private Vector2 rowButtonSize = new Vector2(160f, 100f);
+    [Tooltip("Separación entre botones y entre filas")]
+    [SerializeField] private float rowSpacing = 8f;
+    [Tooltip("Cuánto se suben las filas para que no tapen el texto de la comanda")]
+    [SerializeField] private float rowsRaise = 30f;
+
+    private bool rowsReady;
     [Tooltip("Color de fondo de los botones con dibujo")]
     [SerializeField] private Color artButtonColor = new Color(0.93f, 0.9f, 0.84f);
 
@@ -67,12 +73,21 @@ public class TpvPanel : MonoBehaviour
             return;
         }
 
+        // Con dibujos: una fila con las bebidas y otra debajo con las comidas, centradas
         bool anyArt = false;
+        foreach (MenuItem item in Kitchen.Instance.Menu)
+            if (item != null && item.icon != null) anyArt = true;
+
+        Transform drinkParent = buttonContainer, foodParent = buttonContainer;
+        if (anyArt) SetupRows(out drinkParent, out foodParent);
+
         foreach (MenuItem item in Kitchen.Instance.Menu)
         {
             if (item == null) continue;
-            Button b = Instantiate(productButtonPrefab, buttonContainer);
+            Transform parent = item.category == ItemCategory.Drink ? drinkParent : foodParent;
+            Button b = Instantiate(productButtonPrefab, parent);
             b.name = $"Btn_{item.displayName}";
+            if (anyArt) ((RectTransform)b.transform).sizeDelta = rowButtonSize;
 
             TMP_Text label = b.GetComponentInChildren<TMP_Text>();
             if (label != null) label.text = item.displayName;
@@ -80,7 +95,6 @@ public class TpvPanel : MonoBehaviour
             if (item.icon != null)
             {
                 // Con dibujo: el botón enseña la imagen en vez del nombre
-                anyArt = true;
                 if (b.image != null) b.image.color = artButtonColor;
                 if (label != null) label.gameObject.SetActive(false);
                 AddIcon(b.transform, item.icon);
@@ -92,10 +106,55 @@ public class TpvPanel : MonoBehaviour
 
             b.onClick.AddListener(() => OnProductPressed(item));
         }
+    }
 
-        // Los dibujos necesitan botones más altos
+    // Cambia la rejilla de botones por dos filas centradas (bebidas arriba, comidas abajo)
+    private void SetupRows(out Transform drinkRow, out Transform foodRow)
+    {
         GridLayoutGroup grid = buttonContainer.GetComponent<GridLayoutGroup>();
-        if (anyArt && grid != null) grid.cellSize = artButtonSize;
+        if (grid != null) DestroyImmediate(grid); // no puede haber dos "layouts" en el mismo objeto
+
+        VerticalLayoutGroup column = buttonContainer.GetComponent<VerticalLayoutGroup>();
+        if (column == null) column = buttonContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+        column.childAlignment = TextAnchor.MiddleCenter;
+        column.spacing = rowSpacing;
+        column.childControlWidth = false;
+        column.childControlHeight = false;
+        column.childForceExpandWidth = false;
+        column.childForceExpandHeight = false;
+
+        if (!rowsReady)
+        {
+            ((RectTransform)buttonContainer).anchoredPosition += new Vector2(0f, rowsRaise);
+            // El texto "Barra: 0/6 (+1 en la comanda)" en una sola línea, para que no baje encima de los botones
+            if (statusText != null)
+            {
+                statusText.textWrappingMode = TextWrappingModes.NoWrap;
+                statusText.rectTransform.sizeDelta = new Vector2(700f, statusText.rectTransform.sizeDelta.y);
+            }
+            rowsReady = true;
+        }
+
+        drinkRow = MakeRow("FilaBebidas");
+        foodRow = MakeRow("FilaComidas");
+    }
+
+    private Transform MakeRow(string rowName)
+    {
+        var go = new GameObject(rowName, typeof(RectTransform));
+        go.layer = buttonContainer.gameObject.layer;
+        go.transform.SetParent(buttonContainer, false);
+        ((RectTransform)go.transform).sizeDelta =
+            new Vector2(((RectTransform)buttonContainer).rect.width, rowButtonSize.y);
+
+        var row = go.AddComponent<HorizontalLayoutGroup>();
+        row.childAlignment = TextAnchor.MiddleCenter;
+        row.spacing = rowSpacing;
+        row.childControlWidth = false;
+        row.childControlHeight = false;
+        row.childForceExpandWidth = false;
+        row.childForceExpandHeight = false;
+        return go.transform;
     }
 
     // Imagen del producto dentro del botón, ocupando casi todo el botón

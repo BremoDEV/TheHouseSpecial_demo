@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuItem
   displayName: Refresco
   category: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: a1b1811b48d2d7543983502509d34e6c, type: 3}
   placeholderColor: {r: 0.95, g: 0.25, b: 0.25, a: 1}
   replaces: {fileID: 0}
   priceMultiplier: 1

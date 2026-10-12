@@ -109,7 +109,7 @@ public static partial class DemoSceneBuilder
         if (kitchen != null)
         {
             for (int s = 0; s < kitchen.transform.childCount; s++)
-                Move(kitchen.transform.GetChild(s), new Vector3(BarX, longTop - 0.6f - s * 0.8f, 0f));
+                Move(kitchen.transform.GetChild(s), new Vector3(BarX, longTop - 0.55f - s * 0.74f, 0f));
             Set(kitchen, "waitressStandOffset", new Vector2(-0.85f, 0f));
         }
 
@@ -147,11 +147,14 @@ public static partial class DemoSceneBuilder
             Move(tpv.transform, new Vector3(8.6f, 3.95f, 0f));
             MoveInteractionPoint(tpv.GetComponent<Interactable>(), new Vector3(8.6f, 3.0f, 0f));
         }
+        // Cartas: al final (abajo) de la barra larga, debajo del último hueco de platos
         var cartas = GameObject.Find("Cartas");
         if (cartas != null)
         {
-            Move(cartas.transform, new Vector3(9.9f, 3.95f, 0f));
-            MoveInteractionPoint(cartas.GetComponent<Interactable>(), new Vector3(9.9f, 3.0f, 0f));
+            Move(cartas.transform, new Vector3(BarX, -5.5f, 0f), new Vector3(0.75f, 0.75f, 1f));
+            var sr = cartas.GetComponent<SpriteRenderer>();
+            if (sr != null) sr.sortingOrder = 1; // por encima de la barra
+            MoveInteractionPoint(cartas.GetComponent<Interactable>(), new Vector3(BarX - 1f, -5.5f, 0f));
         }
 
         // --- Cola fuera, entrada y salida por abajo a la izquierda ---
@@ -170,7 +173,7 @@ public static partial class DemoSceneBuilder
 
         // --- Carteles (se mueven, no se cambia el texto que hayáis puesto) ---
         MoveLabel("COLA", new Vector3(-9.3f, 1.3f, 0f), 4f);
-        MoveLabel("CARTAS", new Vector3(9.9f, 4.65f, 0f), 2f);
+        MoveLabel("CARTAS", new Vector3(6.05f, -5.5f, 0f), 2f);
         MoveLabel("TPV", new Vector3(8.6f, 4.65f, 0f), 2f);
         MoveLabel("TRASTERO", new Vector3(6.4f, 5.4f, 0f), 3f);
         MoveLabel("CUBIERTOS", new Vector3(6.55f, -0.3f, 0f), 2.2f);

@@ -121,7 +121,7 @@ public class TutorialManager : MonoBehaviour
         yield return Step("Está bebiendo. Después pedirá la CARTA (para comer) o la CUENTA (para irse).",
             () => group.State >= GroupState.WantsMenu, table.transform);
 
-        yield return Step("Quiere la CARTA. Coge una en CARTAS (junto al TPV) y llévasela a la mesa.",
+        yield return Step("Quiere la CARTA. Coge una en CARTAS (al final de la barra larga) y llévasela a la mesa.",
             () => group.State >= GroupState.ChoosingFood, menus,
             () => HoldsItem(HeldItemType.Menu) ? table.transform : menus);
 

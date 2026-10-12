@@ -31,7 +31,9 @@ public class Table : Interactable
     [SerializeField] private Color dirtyColor = new Color(0.55f, 0.4f, 0.25f);
 
     [Header("Platos y bebidas encima de la mesa")]
-    [Tooltip("Plato limpio: aparece al poner los cubiertos")]
+    [Tooltip("Cubiertos en servilleta: aparecen delante de cada cliente al poner la mesa")]
+    [SerializeField] private Sprite cutlerySprite;
+    [Tooltip("(No se usa de momento) Plato limpio")]
     [SerializeField] private Sprite cleanPlateSprite;
     [Tooltip("Plato sucio: lo que queda cuando terminan de comer o beber")]
     [SerializeField] private Sprite dirtyPlateSprite;
@@ -41,9 +43,12 @@ public class Table : Interactable
     [SerializeField] private Vector2[] drinkSpots = { new Vector2(-0.42f, 0.16f), new Vector2(0.42f, 0.16f) };
     [Tooltip("Dónde va el plato de cada cliente (izquierda y derecha), respecto al centro de la mesa")]
     [SerializeField] private Vector2[] plateSpots = { new Vector2(-0.26f, -0.1f), new Vector2(0.26f, -0.1f) };
+    [Tooltip("Dónde van los cubiertos de cada cliente (izquierda y derecha), por fuera del plato")]
+    [SerializeField] private Vector2[] cutlerySpots = { new Vector2(-0.6f, -0.08f), new Vector2(0.6f, -0.08f) };
 
     private SpriteRenderer[] drinkSlots;
     private SpriteRenderer[] plateSlots;
+    private SpriteRenderer[] cutlerySlots;
 
     public TableState State => state;
     public CustomerGroup Group { get; private set; }
@@ -54,6 +59,7 @@ public class Table : Interactable
     {
         drinkSlots = CreateSlots("Bebida", drinkSpots, 2);
         plateSlots = CreateSlots("Plato", plateSpots, 3);
+        cutlerySlots = CreateSlots("Cubiertos", cutlerySpots, 4);
     }
 
     private void Start()
@@ -106,16 +112,16 @@ public class Table : Interactable
         SetState(leaveDirty ? TableState.Dirty : TableState.Empty);
     }
 
-    // Poner la mesa. Si hay dibujo de plato limpio, sale un plato por cliente; si no, la barrita gris.
+    // Poner la mesa. Con dibujo: unos cubiertos en servilleta delante de cada cliente; sin dibujo, la barrita gris.
     public void SetCutlery(bool visible)
     {
-        bool usePlates = visible && cleanPlateSprite != null && plateSlots != null;
-        if (cutleryVisual != null) cutleryVisual.SetActive(visible && !usePlates);
-        if (!usePlates) return;
+        bool useArt = visible && cutlerySprite != null && cutlerySlots != null;
+        if (cutleryVisual != null) cutleryVisual.SetActive(visible && !useArt);
+        if (!useArt) return;
 
-        int people = Group != null ? Group.Size : plateSlots.Length;
-        for (int i = 0; i < people && i < plateSlots.Length; i++)
-            if (!plateSlots[i].enabled) Show(plateSlots[i], cleanPlateSprite, Color.white);
+        int people = Group != null ? Group.Size : cutlerySlots.Length;
+        for (int i = 0; i < people && i < cutlerySlots.Length; i++)
+            Show(cutlerySlots[i], cutlerySprite, Color.white);
     }
 
     // ------------------------------------------------------------- PLATOS Y BEBIDAS
@@ -141,6 +147,7 @@ public class Table : Interactable
     {
         if (drinkSlots != null) foreach (SpriteRenderer r in drinkSlots) r.enabled = false;
         if (plateSlots != null) foreach (SpriteRenderer r in plateSlots) r.enabled = false;
+        if (cutlerySlots != null) foreach (SpriteRenderer r in cutlerySlots) r.enabled = false;
     }
 
     // Enseña un dibujo (o un cuadrado de color si no hay dibujo) con el tamaño 'itemSize'
