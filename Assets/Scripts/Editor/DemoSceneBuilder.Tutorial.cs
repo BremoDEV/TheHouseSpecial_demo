@@ -122,22 +122,56 @@ public static partial class DemoSceneBuilder
         Transform canvas = tpvPanel.transform;
         var bottom = new Vector2(0.5f, 0f);
 
+        // Panel: una libreta como la del menú, con letra hecha a mano
         var panel = UI("PanelTutorial", canvas);
-        Place(panel, bottom, new Vector2(0f, 180f), new Vector2(1400f, 140f));
+        Place(panel, bottom, new Vector2(-100f, 160f), new Vector2(1200f, 270f)); // un poco a la izquierda: no tapa la etiqueta CARTAS
         var bg = panel.AddComponent<Image>();
-        bg.color = new Color(0.08f, 0.08f, 0.12f, 0.88f);
+        bg.sprite = LoadMenuSprite("menu_libreta_tutorial", false);
+        bg.color = Color.white;
         bg.raycastTarget = false; // se puede clicar el juego a través del panel
 
-        var text = MakeText("Texto", panel.transform, "", 32f, Color.white);
-        Stretch(text.gameObject, 14f);
-        text.rectTransform.offsetMax = new Vector2(-270f, -14f); // sitio para el botón Continuar
+        TMP_FontAsset hand = GetHandwritingFont();
+        var ink = new Color32(40, 38, 72, 255);   // azul tinta, como las comandas
+        var pink = new Color32(196, 70, 100, 255); // rosa de la libreta
+
+        var text = MakeText("Texto", panel.transform, "", 36f, ink);
+        Stretch(text.gameObject, 0f);
+        // Dentro del papel: a la derecha del margen rojo y por encima de la fila de "Continuar"
+        text.rectTransform.offsetMin = new Vector2(96f, 60f);
+        text.rectTransform.offsetMax = new Vector2(-50f, -72f);
         text.alignment = TextAlignmentOptions.MidlineLeft;
         text.textWrappingMode = TextWrappingModes.Normal;
+        text.enableAutoSizing = true; // los textos largos encogen un poco para caber
+        text.fontSizeMin = 24f;
+        text.fontSizeMax = 36f;
+        if (hand != null) text.font = hand;
 
-        var continueButton = MakeButton("BtnContinuar", panel.transform, "Continuar", new Vector2(1f, 0.5f),
-            new Vector2(-135f, 0f), new Vector2(230f, 90f), new Color(0.25f, 0.65f, 0.3f), 34f);
-        var skipButton = MakeButton("BtnSaltarTutorial", canvas, "Saltar tutorial >>", new Vector2(0.5f, 1f),
-            new Vector2(250f, -50f), new Vector2(300f, 60f), new Color(0.35f, 0.35f, 0.42f), 30f);
+        // "Continuar >>" escrito en la libreta (sin botón)
+        var contGo = UI("BtnContinuar", panel.transform);
+        Place(contGo, new Vector2(1f, 0f), new Vector2(-150f, 42f), new Vector2(230f, 46f));
+        var hit = contGo.AddComponent<Image>();
+        hit.color = new Color(1f, 1f, 1f, 0f); // invisible, solo para poder clicar
+        var continueButton = contGo.AddComponent<Button>();
+        var contText = MakeText("Texto", contGo.transform, "Continuar >>", 34f, Color.white);
+        Stretch(contText.gameObject, 0f);
+        contText.alignment = TextAlignmentOptions.MidlineRight;
+        contText.textWrappingMode = TextWrappingModes.NoWrap;
+        if (hand != null) contText.font = hand;
+        continueButton.targetGraphic = contText;
+        var colors = continueButton.colors;
+        colors.normalColor = pink;
+        colors.highlightedColor = new Color32(140, 30, 70, 255);
+        colors.pressedColor = new Color32(100, 20, 50, 255);
+        colors.selectedColor = pink;
+        continueButton.colors = colors;
+
+        // "Saltar tutorial": una comanda suelta arriba (como las del menú, sin libreta detrás)
+        var skipImg = MenuImage("BtnSaltarTutorial", canvas, "menu_comanda_saltar", new Vector2(0.5f, 1f),
+            new Vector2(250f, -62f), new Vector2(360f, 109f), 1.5f, true);
+        var skipButton = skipImg.gameObject.AddComponent<Button>();
+        skipButton.targetGraphic = skipImg;
+        skipButton.transition = Selectable.Transition.None; // la animación la hace TicketButton
+        skipImg.gameObject.AddComponent<TicketButton>();
 
         // Que se dibujen debajo de la pantalla en negro y de la pausa
         var blackout = canvas.Find("PanelNegro");
@@ -242,6 +276,39 @@ public static partial class DemoSceneBuilder
     // ------------------------------------------------------------------ ARTE DEL MENÚ
 
     private const string MenuArtFolder = "Assets/Arte/Menu";
+
+    // Letra "Nothing You Could Do" (la de la libreta del menú) como fuente de TextMeshPro.
+    // La crea la primera vez a partir del .ttf de Assets/Arte/Menu.
+    private const string HandFontFile = MenuArtFolder + "/NothingYouCouldDo-Regular.ttf";
+    private const string HandFontAssetPath = MenuArtFolder + "/NothingYouCouldDo SDF.asset";
+
+    private static TMP_FontAsset GetHandwritingFont()
+    {
+        var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(HandFontAssetPath);
+        if (existing != null) return existing;
+
+        var font = AssetDatabase.LoadAssetAtPath<Font>(HandFontFile);
+        if (font == null)
+        {
+            Debug.LogWarning("[Tutorial] No encuentro " + HandFontFile + ". Uso la letra normal.");
+            return null;
+        }
+        var asset = TMP_FontAsset.CreateFontAsset(font, 90, 9, UnityEngine.TextCore.LowLevel.GlyphRenderMode.SDFAA,
+            1024, 1024, AtlasPopulationMode.Dynamic, false);
+        if (asset == null) return null;
+        asset.name = "NothingYouCouldDo SDF";
+        AssetDatabase.CreateAsset(asset, HandFontAssetPath);
+        asset.atlasTextures[0].name = "NothingYouCouldDo Atlas";
+        AssetDatabase.AddObjectToAsset(asset.atlasTextures[0], asset);
+        asset.material.name = "NothingYouCouldDo Material";
+        AssetDatabase.AddObjectToAsset(asset.material, asset);
+        // Todas las letras del castellano ya guardadas (por si en la build no se pudieran generar)
+        asset.TryAddCharacters(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" +
+                               "¡¿áéíóúüñÁÉÍÓÚÜÑ€ºª«»…·");
+        EditorUtility.SetDirty(asset);
+        AssetDatabase.SaveAssets();
+        return asset;
+    }
 
     private static Sprite LoadMenuSprite(string fileName, bool readable)
     {
