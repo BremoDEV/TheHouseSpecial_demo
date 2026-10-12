@@ -566,7 +566,7 @@ public class CustomerGroup : MonoBehaviour
             CustomerMood.Angry => angryColor,
             _ => happyColor
         };
-        for (int i = 0; i < Size; i++) members[i].SetFaceColor(c);
+        for (int i = 0; i < Size; i++) members[i].SetFaceColor(c, Mood == CustomerMood.Happy);
     }
 
     private void SetAlert(AlertType type)

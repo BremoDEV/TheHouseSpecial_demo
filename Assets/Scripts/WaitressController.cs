@@ -28,6 +28,8 @@ public class WaitressController : MonoBehaviour
     [Tooltip("Sprite de la camarera. Se voltea según la dirección. " +
              "Se asume que el dibujo original mira a la DERECHA.")]
     [SerializeField] private SpriteRenderer spriteRenderer;
+    [Tooltip("Si el dibujo siempre mira al frente (sin animación), desmárcalo para que no se voltee")]
+    [SerializeField] private bool flipWithMovement = true;
 
     private readonly List<Vector2> path = new List<Vector2>(); // puntos que faltan por recorrer
     private bool isMoving;
@@ -89,7 +91,7 @@ public class WaitressController : MonoBehaviour
         transform.position = next;
 
         float dx = target.x - current.x;
-        if (spriteRenderer != null && Mathf.Abs(dx) > 0.01f)
+        if (flipWithMovement && spriteRenderer != null && Mathf.Abs(dx) > 0.01f)
             spriteRenderer.flipX = dx < 0;
 
         if (Vector2.Distance(next, target) <= arriveDistance)

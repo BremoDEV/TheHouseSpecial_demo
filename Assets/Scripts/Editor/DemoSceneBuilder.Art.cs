@@ -7,9 +7,10 @@ using UnityEngine;
 // Uso: menú  Tools → The House Special → Aplicar arte de comida y bebida  (con Demo_Restaurante abierta)
 // - Ajusta la importación de los PNG (pixel art: sin suavizado, 128 píxeles = 1 unidad).
 // - Carta de la demo: Agua, Vino, Brochetas de carne y Pollo asado, cada uno con su dibujo.
-// - Platos especiales: Pájaro azul → Pollo con plumas azules; Perro → Brocheta de la casa.
+// - Platos especiales: Pájaro azul → Pollo con plumas azules; Loba → Brocheta de la casa.
 // - Mesas: plato limpio y plato sucio. Camarera: pila de platos sucios al recoger una mesa.
-// - El tipo de cliente "Gato" pasa a llamarse "Perro".
+// - Clientes con dibujo (Assets/Arte/PJ): Pájaro azul, Loba, Hámster y Zorra. Camarera: Haiki.
+// Los dibujos se buscan por nombre en Assets/Arte y TODAS sus subcarpetas (da igual cómo las ordenéis).
 // Para añadir más arte: mete el PNG en Assets/Arte y añade una línea en la lista 'Products' de abajo.
 public static partial class DemoSceneBuilder
 {
@@ -30,8 +31,20 @@ public static partial class DemoSceneBuilder
     private static readonly (string customer, string original, string special, string sprite)[] Specials =
     {
         ("Pájaro azul", "Pollo asado", "Pollo con plumas azules", "sprite_pollo2"),
-        ("Perro", "Brochetas de carne", "Brocheta de la casa", "sprite_carne2"),
+        ("Loba", "Brochetas de carne", "Brocheta de la casa", "sprite_carne2"),
     };
+
+    // Tipos de cliente: (nombre, dibujo). El nombre es el que usan los platos especiales y el tutorial.
+    private static readonly (string name, string sprite)[] CustomerArt =
+    {
+        ("Pájaro azul", "NPC_1_PajaroAzul"),
+        ("Loba", "NPC_2_Loba"),
+        ("Hámster", "NPC_3_hamster"),
+        ("Zorra", "NPC_4_Zorra"),
+    };
+    private const string WaitressSprite = "MainChar_Haiki";
+    // Alto del dibujo de los personajes en unidades (PNG de 128x256 contando el hueco transparente)
+    private const float CharacterArtHeight = 1.6f;
 
     private const string CleanPlateSprite = "sprite_platoLimpio";
     private const string DirtyPlateSprite = "sprite_platoSucio";
@@ -61,7 +74,7 @@ public static partial class DemoSceneBuilder
         ApplyArtToScene();
         EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
         EditorUtility.DisplayDialog("¡Listo!",
-            "Arte aplicado: carta de 4 productos con dibujo, platos en las mesas y especiales del Pájaro azul y del Perro.\n\n" +
+            "Arte aplicado: carta de 4 productos con dibujo, platos en las mesas y especiales del Pájaro azul y de la Loba, clientes y camarera con dibujo.\n\n" +
             "Guarda la escena con Ctrl+S y dale a Play.\n\n" +
             "Después vuelve a lanzar 'Montar tutorial y menú principal' para que el tutorial también lo tenga.", "Vale");
     }
@@ -73,9 +86,13 @@ public static partial class DemoSceneBuilder
         // 0) Borrar copias repetidas ("sprite_X 1.png" idéntico a "sprite_X.png"). Van a la papelera.
         RemoveDuplicateArt();
 
-        // 1) Importación de todos los PNG de la carpeta de arte
+        // 1) Importación de todos los PNG de la carpeta de arte (menos el arte del menú, que no es pixel art)
         foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
-            ConfigurePixelArt(AssetDatabase.GUIDToAssetPath(guid));
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (path.StartsWith(ArtFolder + "/Menu/")) continue;
+            ConfigurePixelArt(path);
+        }
 
         // 2) Productos de la carta
         var menu = new List<Object>();
@@ -156,23 +173,110 @@ public static partial class DemoSceneBuilder
                 Set(b, "cloudWidth", 1.4f);
                 Set(b, "artIconSize", 0.88f);
             }
+            // Los personajes con dibujo son más anchos: más hueco entre los dos de un grupo en la cola
+            foreach (CustomerGroup g in root.GetComponentsInChildren<CustomerGroup>(true))
+                Set(g, "queueMemberOffset", new Vector2(0.85f, 0f));
+            Transform memberB = root.transform.Find("Customer_B");
+            if (memberB != null) memberB.localPosition = new Vector3(0.85f, 0f, 0f);
             PrefabUtility.SaveAsPrefabAsset(root, groupPrefabPath);
             PrefabUtility.UnloadPrefabContents(root);
         }
 
-        // 7) El Gato pasa a ser el Perro
+        // 7) Clientes con dibujo (sin tinte de color)
         var spawner = Object.FindAnyObjectByType<CustomerSpawner>();
         if (spawner != null)
         {
             var sso = new SerializedObject(spawner);
             var looks = sso.FindProperty("looks");
-            for (int i = 0; i < looks.arraySize; i++)
+            looks.arraySize = CustomerArt.Length;
+            for (int i = 0; i < CustomerArt.Length; i++)
             {
-                var typeName = looks.GetArrayElementAtIndex(i).FindPropertyRelative("typeName");
-                if (typeName.stringValue == "Gato") typeName.stringValue = "Perro";
+                var el = looks.GetArrayElementAtIndex(i);
+                el.FindPropertyRelative("typeName").stringValue = CustomerArt[i].name;
+                el.FindPropertyRelative("sprite").objectReferenceValue = LoadArt(CustomerArt[i].sprite);
+                el.FindPropertyRelative("tint").colorValue = Color.white;
             }
             sso.ApplyModifiedPropertiesWithoutUndo();
         }
+
+        // 7b) Cartel "PLS WAIT" al principio de la cola (sustituye a la etiqueta COLA)
+        PlaceWaitSign();
+
+        // 8) Camarera: Haiki
+        var waitress = Object.FindAnyObjectByType<WaitressController>();
+        Sprite haiki = LoadArt(WaitressSprite);
+        if (waitress != null && haiki != null)
+        {
+            var wso = new SerializedObject(waitress);
+            var sr = wso.FindProperty("spriteRenderer").objectReferenceValue as SpriteRenderer;
+            wso.FindProperty("flipWithMovement").boolValue = false; // siempre mira al frente
+            wso.ApplyModifiedPropertiesWithoutUndo();
+            if (sr != null)
+            {
+                Undo.RecordObject(sr, "Aplicar arte");
+                Undo.RecordObject(sr.transform, "Aplicar arte");
+                sr.sprite = haiki;
+                sr.color = Color.white;
+                sr.flipX = false;
+                float scale = CharacterArtHeight / Mathf.Max(0.01f, haiki.bounds.size.y);
+                sr.transform.localPosition = new Vector3(0f, 0.6f, 0f);
+                sr.transform.localScale = new Vector3(scale, scale, 1f);
+                var col = sr.GetComponent<Collider2D>();
+                if (col is CapsuleCollider2D cap)
+                {
+                    cap.size = new Vector2(haiki.bounds.size.x * 0.6f, haiki.bounds.size.y * 0.8f);
+                    cap.offset = Vector2.zero;
+                }
+            }
+            // Lo que lleva en las manos, por encima de la cabeza
+            SetChildY(waitress.transform, "Hand_L", 1.75f);
+            SetChildY(waitress.transform, "Hand_R", 1.75f);
+            SetChildY(waitress.transform, "HandLabel_1", 2.15f);
+            SetChildY(waitress.transform, "HandLabel_2", 2.45f);
+        }
+    }
+
+    private const string WaitSignSprite = "Sprite_WaitSign";
+    // Encima del primer sitio de la cola (y = 0.2), entre las dos personas del grupo
+    private static readonly Vector3 WaitSignPosition = new Vector3(-9.2f, 2.5f, 0f);
+    private const float WaitSignHeight = 1.3f;
+
+    private static void PlaceWaitSign()
+    {
+        Sprite sign = LoadArt(WaitSignSprite);
+        if (sign == null) return;
+
+        GameObject go = GameObject.Find("CartelEspera");
+        if (go == null)
+        {
+            go = new GameObject("CartelEspera");
+            Undo.RegisterCreatedObjectUndo(go, "Cartel de espera");
+            go.AddComponent<SpriteRenderer>();
+        }
+        Undo.RecordObject(go.transform, "Cartel de espera");
+        go.transform.position = WaitSignPosition;
+        float scale = WaitSignHeight / Mathf.Max(0.01f, sign.bounds.size.y);
+        go.transform.localScale = new Vector3(scale, scale, 1f);
+        var sr = go.GetComponent<SpriteRenderer>();
+        sr.sprite = sign;
+        sr.color = Color.white;
+        sr.sortingOrder = 0;
+
+        // Fuera la etiqueta de texto "COLA"
+        foreach (TMPro.TextMeshPro t in Object.FindObjectsByType<TMPro.TextMeshPro>(FindObjectsInactive.Include))
+        {
+            if (!t.name.StartsWith("Etiqueta_")) continue;
+            if (t.name.ToUpper().Contains("COLA") || t.text.ToUpper() == "COLA")
+                t.gameObject.SetActive(false);
+        }
+    }
+
+    private static void SetChildY(Transform parent, string child, float y)
+    {
+        Transform t = parent.Find(child);
+        if (t == null) return;
+        Undo.RecordObject(t, "Aplicar arte");
+        t.localPosition = new Vector3(t.localPosition.x, y, t.localPosition.z);
     }
 
     private static void SetVector2Array(Object target, string field, params Vector2[] values)
@@ -247,12 +351,18 @@ public static partial class DemoSceneBuilder
         importer.SaveAndReimport();
     }
 
+    // Busca "nombre.png" en Assets/Arte y en todas sus subcarpetas
     private static Sprite LoadArt(string fileName)
     {
-        string path = ArtFolder + "/" + fileName + ".png";
-        var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
-        if (sprite == null) Debug.LogWarning("[Arte] No encuentro el dibujo " + path);
-        return sprite;
+        foreach (string guid in AssetDatabase.FindAssets(fileName + " t:Texture2D", new[] { ArtFolder }))
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (System.IO.Path.GetFileNameWithoutExtension(path) != fileName) continue;
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite != null) return sprite;
+        }
+        Debug.LogWarning("[Arte] No encuentro el dibujo " + fileName + ".png en " + ArtFolder);
+        return null;
     }
 
     private static MenuItem GetOrCreateProduct(string name, ItemCategory category, Color color)

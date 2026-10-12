@@ -529,7 +529,7 @@ public static partial class DemoSceneBuilder
 
     private static void SetLooks(CustomerSpawner spawner)
     {
-        string[] names = { "Pájaro azul", "Perro", "Rana", "Cerdo" };
+        string[] names = { "Pájaro azul", "Loba", "Hámster", "Zorra" };
         Color[] colors =
         {
             new Color(0.3f, 0.5f, 1f), new Color(1f, 0.6f, 0.2f),

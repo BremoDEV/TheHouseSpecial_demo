@@ -197,6 +197,10 @@ MonoBehaviour:
   alertLabel: {fileID: 2924229245908431918}
   orderLabel: {fileID: 3512188757503754838}
   selectionMarker: {fileID: 2432403125516412749}
+  artHeight: 1.6
+  orderBubbleRaise: 0.3
+  alertBubbleRaise: 0.1
+  moodTintStrength: 0.4
   walkSpeed: 3
 --- !u!1 &846651922550878785
 GameObject:
@@ -1584,7 +1588,7 @@ Transform:
   m_GameObject: {fileID: 5144032552626367232}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 0, z: 0}
+  m_LocalPosition: {x: 0.85, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1629,6 +1633,10 @@ MonoBehaviour:
   alertLabel: {fileID: 2854039280117508056}
   orderLabel: {fileID: 832659949353460491}
   selectionMarker: {fileID: 2916284084104160599}
+  artHeight: 1.6
+  orderBubbleRaise: 0.3
+  alertBubbleRaise: 0.1
+  moodTintStrength: 0.4
   walkSpeed: 3
 --- !u!1 &5394548048261936078
 GameObject:
@@ -1771,7 +1779,7 @@ MonoBehaviour:
   members:
   - {fileID: 479510191973616960}
   - {fileID: 3484081424175659339}
-  queueMemberOffset: {x: 0.6, y: 0}
+  queueMemberOffset: {x: 0.85, y: 0}
   queuePatience: 50
   orderDrinksPatience: 30
   waitDrinksPatience: 50

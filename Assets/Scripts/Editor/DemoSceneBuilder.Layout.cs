@@ -172,7 +172,7 @@ public static partial class DemoSceneBuilder
         if (waitress != null) Move(waitress.transform, new Vector3(0f, 0f, 0f));
 
         // --- Carteles (se mueven, no se cambia el texto que hayáis puesto) ---
-        MoveLabel("COLA", new Vector3(-9.3f, 1.3f, 0f), 4f);
+        MoveLabel("COLA", new Vector3(-9.3f, 2.1f, 0f), 4f); // por encima de la cabeza del primero de la cola
         MoveLabel("CARTAS", new Vector3(6.05f, -5.5f, 0f), 2f);
         MoveLabel("TPV", new Vector3(8.6f, 4.65f, 0f), 2f);
         MoveLabel("TRASTERO", new Vector3(6.4f, 5.4f, 0f), 3f);

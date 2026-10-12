@@ -41,11 +41,24 @@ public class Customer : MonoBehaviour
     [Tooltip("Marca que se ve cuando el jugador selecciona al grupo en la cola")]
     [SerializeField] private GameObject selectionMarker;
 
+    [Header("Dibujo del personaje (cuando el Look tiene sprite)")]
+    [Tooltip("Alto total del dibujo en unidades (el PNG de 128x256 incluido el hueco transparente)")]
+    [SerializeField] private float artHeight = 1.6f;
+    [Tooltip("Cuánto se sube el bocadillo de pedido (la nube) para que no tape la cabeza")]
+    [SerializeField] private float orderBubbleRaise = 0.3f;
+    [Tooltip("Cuánto se sube el aviso (¡PEDIR!, CARTA, CUENTA)")]
+    [SerializeField] private float alertBubbleRaise = 0.1f;
+    [Tooltip("Cuánto se tiñe el dibujo de naranja/rojo cuando se impacienta (0 = nada, 1 = color puro)")]
+    [Range(0f, 1f)]
+    [SerializeField] private float moodTintStrength = 0.4f;
+
     [Header("Movimiento (editable por diseño)")]
     [SerializeField] private float walkSpeed = 3f;
 
     private readonly List<Vector2> path = new List<Vector2>();
     private bool hasTarget;
+
+    private bool hasArt;
 
     public bool IsWalking => hasTarget;
     public string TypeName { get; private set; } = "Cliente";
@@ -77,16 +90,40 @@ public class Customer : MonoBehaviour
     {
         if (look == null) return;
         TypeName = look.typeName;
-        if (bodyRenderer != null)
+        if (bodyRenderer == null) return;
+        bodyRenderer.color = look.tint;
+        if (look.sprite == null) return;
+
+        // Con dibujo: tamaño real del personaje, sin la carita de color, y bocadillos un poco más arriba
+        bodyRenderer.sprite = look.sprite;
+        hasArt = true;
+        float spriteHeight = Mathf.Max(0.01f, look.sprite.bounds.size.y);
+        float scale = artHeight / spriteHeight;
+        bodyRenderer.transform.localScale = new Vector3(scale, scale, 1f);
+        CapsuleCollider2D capsule = bodyRenderer.GetComponent<CapsuleCollider2D>();
+        if (capsule != null)
         {
-            if (look.sprite != null) bodyRenderer.sprite = look.sprite;
-            bodyRenderer.color = look.tint;
+            Vector2 size = look.sprite.bounds.size;
+            capsule.size = new Vector2(size.x * 0.6f, size.y * 0.8f);
+            capsule.offset = Vector2.zero;
         }
+        if (faceRenderer != null) faceRenderer.gameObject.SetActive(false);
+        Raise(alertBubble, alertBubbleRaise);
+        Raise(orderBubble, orderBubbleRaise);
     }
 
-    public void SetFaceColor(Color color)
+    private static void Raise(GameObject bubble, float amount)
+    {
+        if (bubble == null) return;
+        bubble.transform.localPosition += new Vector3(0f, amount, 0f);
+    }
+
+    // calm = paciencia alta. Con dibujo no hay carita: el personaje se tiñe un poco al enfadarse.
+    public void SetFaceColor(Color color, bool calm = false)
     {
         if (faceRenderer != null) faceRenderer.color = color;
+        if (hasArt && bodyRenderer != null)
+            bodyRenderer.color = calm ? Color.white : Color.Lerp(Color.white, color, moodTintStrength);
     }
 
     public void SetAlert(bool visible, Sprite icon, Color color, string label = null)

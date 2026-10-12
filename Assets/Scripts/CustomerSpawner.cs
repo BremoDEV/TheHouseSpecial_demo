@@ -81,7 +81,7 @@ public class CustomerSpawner : MonoBehaviour
         CreateGroup(size, chosen);
     }
 
-    // Para el tutorial: crea YA un grupo concreto (tamaño y tipo de cliente por su nombre, p. ej. "Gato")
+    // Para el tutorial: crea YA un grupo concreto (tamaño y tipo de cliente por su nombre, p. ej. "Loba")
     public CustomerGroup SpawnNow(int size, string typeName)
     {
         CustomerLook look = null;

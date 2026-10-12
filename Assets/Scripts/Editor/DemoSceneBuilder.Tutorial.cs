@@ -219,8 +219,11 @@ public static partial class DemoSceneBuilder
         fondo.raycastTarget = false;
         fondo.preserveAspect = false;
         Stretch(fondo.gameObject, 0f); // ocupa toda la pantalla, sea cual sea su forma
-        var logo = MenuImage("Titulo", c, "menu_titulo", center, new Vector2(-370f, 255f), new Vector2(900f, 347f), 0f); // arriba a la izquierda
+        var logo = MenuImage("Titulo", c, "menu_titulo", center, new Vector2(-370f, 305f), new Vector2(900f, 347f), 0f); // arriba a la izquierda
         logo.raycastTarget = false;
+        // La camarera debajo del logo (la cabeza asoma un poco por delante del borde del logo)
+        var camarera = MenuImage("Camarera", c, "menu_camarera", center, new Vector2(-300f, -180f), new Vector2(323f, 680f), 0f);
+        camarera.raycastTarget = false;
         var libreta = MenuImage("Libreta", c, "menu_libreta", center, new Vector2(390f, -84f), new Vector2(648f, 713f), 0f); // a la derecha
         libreta.raycastTarget = false;
 
@@ -281,6 +284,52 @@ public static partial class DemoSceneBuilder
         button.transition = Selectable.Transition.None; // la animación la hace TicketButton
         img.gameObject.AddComponent<TicketButton>();
         return button;
+    }
+
+    // ------------------------------------------------------------------ MENÚ DE PAUSA (libreta con comandas)
+
+    // Cambia el menú de pausa de la escena ABIERTA por la libreta con comandas (Continuar / Reiniciar / Salir)
+    [UnityEditor.MenuItem("Tools/The House Special/Actualizar menú de pausa")]
+    public static void UpdatePauseMenuMenu()
+    {
+        if (Object.FindAnyObjectByType<PauseMenu>() == null)
+        {
+            EditorUtility.DisplayDialog("Menú de pausa", "Abre primero la escena Demo_Restaurante.", "Vale");
+            return;
+        }
+        uiLayer = LayerMask.NameToLayer("UI");
+        UpdatePausePanelInScene();
+        EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("¡Listo!",
+            "Menú de pausa actualizado.\n\nGuarda la escena con Ctrl+S.\n\n" +
+            "Después vuelve a lanzar 'Montar tutorial y menú principal' para que el tutorial también lo tenga.", "Vale");
+    }
+
+    private static void UpdatePausePanelInScene()
+    {
+        var pause = Object.FindAnyObjectByType<PauseMenu>();
+        if (pause == null) return;
+        var so = new SerializedObject(pause);
+        var panel = so.FindProperty("pausePanel").objectReferenceValue as GameObject;
+        if (panel == null) return;
+
+        // Fuera lo de antes (título y botones), se queda el fondo oscuro del panel
+        for (int i = panel.transform.childCount - 1; i >= 0; i--)
+            Object.DestroyImmediate(panel.transform.GetChild(i).gameObject);
+        var dim = panel.GetComponent<Image>();
+        if (dim != null) dim.color = new Color(0.12f, 0.04f, 0.07f, 0.65f);
+
+        var center = new Vector2(0.5f, 0.5f);
+        var libreta = MenuImage("Libreta", panel.transform, "menu_libreta_pausa", center, Vector2.zero, new Vector2(648f, 713f), 0f);
+        libreta.raycastTarget = false;
+        var resume = MenuTicket("BtnContinuar", panel.transform, "menu_comanda_continuar", new Vector2(11f, 70f), -2f);
+        var restart = MenuTicket("BtnReiniciar", panel.transform, "menu_comanda_reiniciar", new Vector2(11f, -65f), 1.5f);
+        var quit = MenuTicket("BtnSalir", panel.transform, "menu_comanda_salir", new Vector2(11f, -200f), -1f);
+
+        so.FindProperty("resumeButton").objectReferenceValue = resume;
+        so.FindProperty("restartButton").objectReferenceValue = restart;
+        so.FindProperty("quitButton").objectReferenceValue = quit;
+        so.ApplyModifiedPropertiesWithoutUndo();
     }
 
     // ------------------------------------------------------------------ BUILD PROFILES
