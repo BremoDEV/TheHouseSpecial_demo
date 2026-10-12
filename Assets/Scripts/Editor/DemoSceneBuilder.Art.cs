@@ -229,6 +229,12 @@ public static partial class DemoSceneBuilder
 
         // 7a) Barra en L y suelo de la cocina con dibujo
         ApplyBarArt();
+        // 7a2) Suelo y pared de arriba con los tiles (Assets/Arte/Tiles)
+        ApplyTileArt();
+
+        // 7a3) Fuera todas las etiquetas de texto del suelo (CUBIERTOS, CARTAS, PLATOS SUCIOS...): ya se ve todo con dibujos
+        foreach (TMPro.TextMeshPro t in Object.FindObjectsByType<TMPro.TextMeshPro>(FindObjectsInactive.Include))
+            if (t.name.StartsWith("Etiqueta_")) t.gameObject.SetActive(false);
 
         // 7b) Cartel "PLS WAIT" al principio de la cola (sustituye a la etiqueta COLA)
         PlaceWaitSign();
@@ -391,6 +397,63 @@ public static partial class DemoSceneBuilder
         }
     }
 
+    // ---------- Tiles (Assets/Arte/Tiles): baldosas de 64x64 que se repiten
+    //   tileset_suelo                   = suelo del restaurante (todo el fondo)
+    //   tiles_pared                     = papel pintado de la pared de arriba
+    //   tilese_pared_base(la roja)      = la fila de abajo de la pared, con el rodapié rojo (toca el suelo)
+    private const string FloorTile = "tileset_suelo";
+    private const string WallTile = "tiles_pared";
+    private const string WallBaseTile = "tilese_pared_base(la roja)";
+    private const float BenchTintAlpha = 0.45f; // lo opaco que es el rojo del banco encima de la pared (0 = nada, 1 = rojo liso)
+    private const float TileSize = 0.8f; // tamaño de cada baldosa en el juego (la pared de arriba mide 3 baldosas)
+
+    private static void ApplyTileArt()
+    {
+        float ppu = 64f / TileSize;
+        Sprite floorTile = CroppedSprite(FloorTile, ppu, Vector4.zero);
+        Sprite wallTile = CroppedSprite(WallTile, ppu, Vector4.zero);
+        Sprite baseTile = CroppedSprite(WallBaseTile, ppu, Vector4.zero);
+        const float screenLeft = -10.7f, screenRight = 10.7f, screenTop = 6f, screenBottom = -6f;
+
+        // Suelo: toda la pantalla (la calle, la cocina, etc. se dibujan encima)
+        var floor = GameObject.Find("Suelo");
+        if (floorTile != null && floor != null)
+        {
+            ArtPiece("Arte_Suelo", floorTile, new Vector2(screenLeft, screenTop),
+                new Vector2(screenRight - screenLeft, screenTop - screenBottom), SpriteDrawMode.Tiled, -100);
+            HideRenderer(floor);
+        }
+
+        // Pared de arriba: una fila de rodapié abajo (justo donde empieza el suelo) y papel pintado hasta arriba
+        var wall = GameObject.Find("Pared_Arriba");
+        if (wallTile != null && baseTile != null && wall != null)
+        {
+            float left = LeftWallRight;
+            ArtPiece("Arte_ParedBase", baseTile, new Vector2(left, TopWallBottom + TileSize),
+                new Vector2(screenRight - left, TileSize), SpriteDrawMode.Tiled, -50);
+            ArtPiece("Arte_Pared", wallTile, new Vector2(left, screenTop),
+                new Vector2(screenRight - left, screenTop - TopWallBottom - TileSize), SpriteDrawMode.Tiled, -50);
+            HideRenderer(wall); // el collider se queda: sigue siendo pared
+
+            // El banco rojo: la misma pared, con el rectángulo rojo por encima medio transparente (como un filtro)
+            var bench = GameObject.Find("Banco");
+            var benchSr = bench != null ? bench.GetComponent<SpriteRenderer>() : null;
+            if (benchSr != null)
+            {
+                Undo.RecordObject(benchSr, "Aplicar arte");
+                benchSr.color = new Color(BenchColor.r, BenchColor.g, BenchColor.b, BenchTintAlpha);
+            }
+        }
+    }
+
+    private static void HideRenderer(GameObject go)
+    {
+        var sr = go != null ? go.GetComponent<SpriteRenderer>() : null;
+        if (sr == null) return;
+        Undo.RecordObject(sr, "Aplicar arte");
+        sr.enabled = false;
+    }
+
     // Crea (o actualiza) un objeto con el dibujo, con su esquina de arriba a la izquierda en 'topLeft'
     private static void ArtPiece(string name, Sprite sprite, Vector2 topLeft, Vector2 size, SpriteDrawMode mode, int order)
     {
@@ -542,9 +605,10 @@ public static partial class DemoSceneBuilder
     }
 
     // Busca "nombre.png" en Assets/Arte y en todas sus subcarpetas
+    // (mira todos los dibujos y compara el nombre, así funcionan también nombres con espacios o paréntesis)
     private static Sprite LoadArt(string fileName)
     {
-        foreach (string guid in AssetDatabase.FindAssets(fileName + " t:Texture2D", new[] { ArtFolder }))
+        foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (System.IO.Path.GetFileNameWithoutExtension(path) != fileName) continue;

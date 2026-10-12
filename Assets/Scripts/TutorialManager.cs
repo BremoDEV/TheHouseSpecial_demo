@@ -121,7 +121,7 @@ public class TutorialManager : MonoBehaviour
         yield return Step("Está bebiendo. Después pedirá la CARTA (para comer) o la CUENTA (para irse).",
             () => group.State >= GroupState.WantsMenu, table.transform);
 
-        yield return Step("Quiere la CARTA. Coge una en CARTAS (al final de la barra larga) y llévasela a la mesa.",
+        yield return Step("Quiere la CARTA. Coge una de la caja de cartas (al final de la barra larga) y llévasela a la mesa.",
             () => group.State >= GroupState.ChoosingFood, menus,
             () => HoldsItem(HeldItemType.Menu) ? table.transform : menus);
 
@@ -157,7 +157,7 @@ public class TutorialManager : MonoBehaviour
         yield return Step("La mesa se ha quedado SUCIA. Haz clic en ella para recoger los platos.",
             () => table.State != TableState.Dirty, table.transform);
 
-        yield return Step("Deja los platos en SUCIOS Y SOBRAS. Ahí también puedes tirar cualquier cosa que te sobre.",
+        yield return Step("Deja los platos en la parte corta de la barra (sucios y sobras). Ahí también puedes tirar cualquier cosa que te sobre.",
             () => !HoldsItem(HeldItemType.DirtyDishes), dishReturn);
 
         // --- Ira ---
