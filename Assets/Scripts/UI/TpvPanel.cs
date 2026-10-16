@@ -52,6 +52,7 @@ public class TpvPanel : MonoBehaviour
 
     private WaitressController waitress;
     private readonly List<MenuItem> selection = new List<MenuItem>();
+    private bool billTaken; // si se ha sacado una cuenta desde que se abrió (entonces "Pedir" sirve para cerrar)
 
     private bool UsesOrderTicket => orderButton != null;
 
@@ -201,6 +202,7 @@ public class TpvPanel : MonoBehaviour
     {
         waitress = w;
         selection.Clear();
+        billTaken = false;
         root.SetActive(true);
         RefreshTexts();
     }
@@ -250,6 +252,8 @@ public class TpvPanel : MonoBehaviour
     {
         if (selection.Count == 0)
         {
+            // Solo has sacado la cuenta: "Pedir" cierra la TPV
+            if (billTaken) { Close(); return; }
             GameMessages.Show("La comanda está vacía: elige primero los productos");
             return;
         }
@@ -274,7 +278,10 @@ public class TpvPanel : MonoBehaviour
     private void TakeBill()
     {
         if (waitress != null && waitress.Hands.TryAdd(new HeldItem(HeldItemType.Bill)))
+        {
+            billTaken = true;
             GameMessages.Show("Sacas una cuenta", 1.5f);
+        }
     }
 
     // ------------------------------------------------------------- TEXTOS
@@ -292,7 +299,7 @@ public class TpvPanel : MonoBehaviour
                 ? "Pulsa los productos para apuntarlos en la comanda"
                 : "Comanda: " + Describe(selection);
 
-        if (orderButton != null) orderButton.interactable = selection.Count > 0;
+        if (orderButton != null) orderButton.interactable = selection.Count > 0 || billTaken;
     }
 
     // "2× Agua, Pollo asado"

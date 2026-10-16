@@ -19,7 +19,7 @@ public static partial class DemoSceneBuilder
     private const string ScenesFolder = "Assets/Escenas";
     private const string TutorialScenePath = ScenesFolder + "/Tutorial.unity";
     private const string MenuScenePath = ScenesFolder + "/MenuPrincipal.unity";
-    private const string ArrowSpritePath = ScenesFolder + "/Flecha.png";
+    private const string ArrowSpritePath = "Assets/Arte/Generados/Flecha.png";
     private const string TutorialTableName = "Table_2";
 
     [UnityEditor.MenuItem("Tools/The House Special/Montar tutorial y menú principal")]
@@ -54,7 +54,7 @@ public static partial class DemoSceneBuilder
             EditorUtility.DisplayDialog("¡Listo!",
                 "Creadas Assets/Escenas/MenuPrincipal y Assets/Escenas/Tutorial.\n\n" +
                 "Está abierto el menú principal: dale a Play para probarlo todo desde el principio.\n\n" +
-                "Para seguir editando el restaurante, vuelve a abrir Assets/Demo/Demo_Restaurante.", "Vale");
+                "Para seguir editando el restaurante, vuelve a abrir Assets/Escenas/Demo_Restaurante.", "Vale");
         }
         catch (System.Exception e)
         {
@@ -320,9 +320,10 @@ public static partial class DemoSceneBuilder
     }
 
     // Letra "Nothing You Could Do" (la de la libreta del menú) como fuente de TextMeshPro.
-    // La crea la primera vez a partir del .ttf de Assets/Arte/Menu.
-    private const string HandFontFile = MenuArtFolder + "/NothingYouCouldDo-Regular.ttf";
-    private const string HandFontAssetPath = MenuArtFolder + "/NothingYouCouldDo SDF.asset";
+    // La crea la primera vez a partir del .ttf de Assets/Arte/Fuentes.
+    private const string FontsFolder = "Assets/Arte/Fuentes";
+    private const string HandFontFile = FontsFolder + "/NothingYouCouldDo-Regular.ttf";
+    private const string HandFontAssetPath = FontsFolder + "/NothingYouCouldDo SDF.asset";
 
     private static TMP_FontAsset GetHandwritingFont()
     {

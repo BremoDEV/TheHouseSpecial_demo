@@ -11,16 +11,16 @@ using UnityEngine.UI;
 
 // Monta automáticamente una escena jugable de la demo con formas de colores.
 // Uso: menú  Tools → The House Special → Montar escena demo
-// Crea (o reemplaza) la carpeta Assets/Demo con: sprites básicos, los 9 productos,
+// Crea (o reemplaza) la escena Assets/Escenas/Demo_Restaurante con: sprites básicos, los 9 productos,
 // los prefabs (cliente, producto en barra, botón del TPV) y la escena Demo_Restaurante.
 // No toca tus otras escenas ni carpetas.
 public static partial class DemoSceneBuilder
 {
-    private const string Root = "Assets/Demo";
-    private const string SpritesFolder = Root + "/Sprites";
-    private const string DataFolder = Root + "/Data";
-    private const string PrefabsFolder = Root + "/Prefabs";
-    private const string ScenePath = Root + "/Demo_Restaurante.unity";
+    // Dónde va cada cosa (ver Tools → The House Special → Ordenar: carpetas del proyecto)
+    private const string SpritesFolder = "Assets/Arte/Generados";   // formas básicas y recortes automáticos
+    private const string DataFolder = "Assets/Datos/Productos";      // productos de la carta
+    private const string PrefabsFolder = "Assets/Prefabs";
+    private const string ScenePath = "Assets/Escenas/Demo_Restaurante.unity";
 
     private static Sprite square, circle, capsule;
     private static Kitchen builtKitchen;
@@ -35,8 +35,9 @@ public static partial class DemoSceneBuilder
     public static void Build()
     {
         if (!EditorUtility.DisplayDialog("Montar escena demo",
-                "Se va a crear (o REEMPLAZAR) la carpeta Assets/Demo con una escena jugable de la demo.\n\n" +
-                "Tus otras escenas y carpetas no se tocan. ¿Seguimos?", "Montar", "Cancelar"))
+                "OJO: se va a REHACER DESDE CERO la escena Demo_Restaurante (y sus prefabs y productos).\n" +
+                "Perderás los cambios hechos a mano en esa escena. Normalmente NO hace falta: usa los otros botones.\n\n" +
+                "¿Seguimos?", "Rehacer", "Cancelar"))
             return;
 
         if (Resources.Load<TMP_Settings>("TMP Settings") == null)
@@ -90,10 +91,9 @@ public static partial class DemoSceneBuilder
 
             EditorUtility.ClearProgressBar();
             EditorUtility.DisplayDialog("¡Listo!",
-                "Escena creada en Assets/Demo/Demo_Restaurante.\n\n" +
+                "Escena creada en Assets/Escenas/Demo_Restaurante.\n\n" +
                 "Dale a Play. Mira la Console si algo no funciona.\n\n" +
-                "Los productos están en Assets/Demo/Data y los prefabs en Assets/Demo/Prefabs: " +
-                "ahí es donde se cambia el arte.", "A jugar");
+                "Los productos están en Assets/Datos/Productos y los prefabs en Assets/Prefabs.", "A jugar");
         }
         catch (System.Exception e)
         {
@@ -108,11 +108,17 @@ public static partial class DemoSceneBuilder
 
     private static void PrepareFolders()
     {
-        if (AssetDatabase.IsValidFolder(Root)) AssetDatabase.DeleteAsset(Root);
-        AssetDatabase.CreateFolder("Assets", "Demo");
-        AssetDatabase.CreateFolder(Root, "Sprites");
-        AssetDatabase.CreateFolder(Root, "Data");
-        AssetDatabase.CreateFolder(Root, "Prefabs");
+        // Ya no se borra ninguna carpeta: solo se crean si faltan (los archivos se sobrescriben)
+        foreach (string f in new[] { SpritesFolder, DataFolder, PrefabsFolder, "Assets/Escenas" })
+            EnsureAssetFolder(f);
+    }
+
+    private static void EnsureAssetFolder(string folder)
+    {
+        if (AssetDatabase.IsValidFolder(folder)) return;
+        string parent = System.IO.Path.GetDirectoryName(folder).Replace('\\', '/');
+        EnsureAssetFolder(parent);
+        AssetDatabase.CreateFolder(parent, System.IO.Path.GetFileName(folder));
     }
 
     private static void CreateSprites()
@@ -985,11 +991,11 @@ public static partial class DemoSceneBuilder
     // ------------------------------------------------------------------ PANEL DEL TPV (versión con comanda)
 
     private static readonly Color TpvGreen = new Color(0.25f, 0.65f, 0.3f);
-    // Letra de la TPV: Outfit (Google Fonts, licencia libre OFL), en Assets/Arte/Menu
-    private const string TpvFontBold = "Assets/Arte/Menu/Outfit-Bold.ttf";
-    private const string TpvFontBoldAsset = "Assets/Arte/Menu/Outfit-Bold SDF.asset";
-    private const string TpvFontRegular = "Assets/Arte/Menu/Outfit-Regular.ttf";
-    private const string TpvFontRegularAsset = "Assets/Arte/Menu/Outfit-Regular SDF.asset";
+    // Letra de la TPV: Outfit (Google Fonts, licencia libre OFL), en Assets/Arte/Fuentes
+    private const string TpvFontBold = "Assets/Arte/Fuentes/Outfit-Bold.ttf";
+    private const string TpvFontBoldAsset = "Assets/Arte/Fuentes/Outfit-Bold SDF.asset";
+    private const string TpvFontRegular = "Assets/Arte/Fuentes/Outfit-Regular.ttf";
+    private const string TpvFontRegularAsset = "Assets/Arte/Fuentes/Outfit-Regular SDF.asset";
     private static readonly Color TpvBlue = new Color(0.25f, 0.5f, 0.95f);
     private static readonly Color TpvRed = new Color(0.75f, 0.2f, 0.2f);
     private static readonly Color TpvGrey = new Color(0.4f, 0.4f, 0.45f);

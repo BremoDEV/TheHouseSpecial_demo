@@ -95,7 +95,8 @@ public static partial class DemoSceneBuilder
         foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { ArtFolder }))
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
-            if (path.StartsWith(ArtFolder + "/Menu/") || path.StartsWith(ArtFolder + "/UI/")) continue;
+            if (path.StartsWith(ArtFolder + "/Menu/") || path.StartsWith(ArtFolder + "/UI/") ||
+                path.StartsWith(ArtFolder + "/Generados/")) continue; // formas básicas: no son pixel art del equipo
             ConfigurePixelArt(path);
         }
 
@@ -353,6 +354,10 @@ public static partial class DemoSceneBuilder
     // El tablero ocupa la parte de arriba del dibujo (el mantel y las patas van debajo):
     // se baja el dibujo para que el tablero quede donde van los platos y las bebidas.
     private const float TableArtOffsetY = -0.3f;
+    // Collider de la mesa (de las patas a lo alto del tablero) y sitio de la camarera para atenderla
+    private const float TableColliderHeight = 1.5f;
+    private const float TableColliderOffsetY = -0.35f;
+    private const float TableInteractionY = -1.35f;
 
     private static void ApplyTableArt(Table t)
     {
@@ -372,14 +377,17 @@ public static partial class DemoSceneBuilder
         sr.transform.localScale = new Vector3(scale, scale, 1f);
         sr.transform.localPosition = new Vector3(0f, TableArtOffsetY, 0f);
 
-        // El collider (clic y obstáculo) cubre el tablero, sin las patas
+        // El collider (clic y obstáculo) cubre TODA la mesa, patas incluidas: así la camarera
+        // la rodea por delante y nunca pasa "por encima" del dibujo
         var box = t.GetComponent<BoxCollider2D>();
         if (box != null)
         {
             Undo.RecordObject(box, "Aplicar arte");
-            box.size = new Vector2(TableArtWidth, 1.0f);
-            box.offset = new Vector2(0f, -0.1f);
+            box.size = new Vector2(TableArtWidth, TableColliderHeight);
+            box.offset = new Vector2(0f, TableColliderOffsetY);
         }
+        // Donde se pone la camarera para atender: delante de las patas, no encima de ellas
+        MoveInteractionPoint(t, (Vector2)t.transform.position + new Vector2(0f, TableInteractionY));
     }
 
     // ---------- Barra en L con dibujo
@@ -510,7 +518,7 @@ public static partial class DemoSceneBuilder
         if (spriteMaterial != null) sr.sharedMaterial = spriteMaterial;
     }
 
-    // Recorta la parte dibujada de un PNG y la guarda como sprite propio (en Assets/Demo/Sprites),
+    // Recorta la parte dibujada de un PNG y la guarda como sprite propio (en Assets/Arte/Generados),
     // con el punto de anclaje arriba a la izquierda y bordes para la esquina.
     private static Sprite CroppedSprite(string fileName, float ppu, Vector4 border)
     {
