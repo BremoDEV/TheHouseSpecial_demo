@@ -6783,6 +6783,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaitressController
   moveSpeed: 5.5
   arriveDistance: 0.05
+  maxQueuedActions: 3
+  showQueueNumbers: 0
+  queueNumberColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  queueNumberSize: 6
+  queueNumberHeight: 0.45
   rageSpeedSteps:
   - rageAtLeast: 0.5
     totalBonus: 0.1

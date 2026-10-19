@@ -87,6 +87,10 @@ public class TutorialManager : MonoBehaviour
         yield return Info("Para moverte, haz clic donde quieras ir. " +
                           "Si haces clic en algo (una mesa, la barra, el TPV...), la camarera irá y lo usará.");
 
+        yield return Info("Puedes encadenar hasta 3 acciones: por ejemplo, clic en una mesa, luego en el TPV y luego en otra mesa, " +
+                          "y la camarera las hará una detrás de otra.\n" +
+                          "Si te equivocas, haz clic derecho para cancelar todo lo que tenías apuntado.");
+
         // --- Sentar al cliente ---
         CustomerGroup group = spawner.SpawnNow(1, firstCustomerType);
         group.PatiencePaused = true;

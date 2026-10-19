@@ -9,4 +9,12 @@ public class Tpv : Interactable
     {
         if (panel != null) panel.Open(waitress);
     }
+
+    // Mientras el panel esté abierto, la camarera espera en la TPV antes de seguir con la cola
+    public override bool HoldsWaitress => panel != null && panel.IsOpen;
+
+    public override void ReleaseWaitress()
+    {
+        if (panel != null && panel.IsOpen) panel.Close();
+    }
 }

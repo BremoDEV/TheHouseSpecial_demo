@@ -15,4 +15,12 @@ public abstract class Interactable : MonoBehaviour
 
     // Se llama cuando la camarera LLEGA al punto de interacción (no al hacer clic).
     public abstract void Interact(WaitressController waitress);
+
+    // ¿La camarera tiene que quedarse aquí después de interactuar? (p. ej. con la TPV abierta
+    // o descansando en el trastero). Mientras sea true, no pasa a la siguiente acción de la cola.
+    public virtual bool HoldsWaitress => false;
+
+    // Se llama si el jugador hace un clic nuevo mientras la camarera está "retenida" aquí:
+    // el objeto debe soltarla (cerrar su panel, etc.) para que siga con la cola.
+    public virtual void ReleaseWaitress() { }
 }

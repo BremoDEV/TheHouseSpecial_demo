@@ -2797,7 +2797,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -6494,6 +6494,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaitressController
   moveSpeed: 5.5
   arriveDistance: 0.05
+  maxQueuedActions: 3
+  showQueueNumbers: 0
+  queueNumberColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  queueNumberSize: 6
+  queueNumberHeight: 0.45
   rageSpeedSteps:
   - rageAtLeast: 0.5
     totalBonus: 0.1
@@ -6502,7 +6507,7 @@ MonoBehaviour:
   - rageAtLeast: 0.9
     totalBonus: 0.3
   spriteRenderer: {fileID: 1198823965}
-  flipWithMovement: 0
+  flipWithMovement: 1
 --- !u!4 &1280350468
 Transform:
   m_ObjectHideFlags: 0
@@ -7298,7 +7303,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2

@@ -6,8 +6,10 @@ using UnityEngine.InputSystem;
 // - Clic en un grupo de la cola -> lo selecciona (la camarera no se mueve).
 // - Con un grupo seleccionado, clic en una mesa limpia y vacía -> se sientan solos.
 // - Clic en un cliente sentado (o en su bocadillo: ¡PEDIR!, CARTA, CUENTA, pedido) -> cuenta como clic en su mesa.
-// - Clic en algo interactuable -> la camarera va y lo usa.
-// - Clic en el suelo -> la camarera camina (y se cancela la selección).
+// - Clic en algo interactuable -> se apunta en la cola: la camarera irá y lo usará.
+// - Clic en el suelo -> se apunta en la cola: la camarera caminará hasta ahí (y se cancela la selección).
+// - Clic derecho -> se borra la cola de acciones (la camarera se para).
+// La cola tiene un máximo de acciones (en el WaitressController); si está llena, el clic se ignora (sin aviso).
 // No hace nada si el juego está en pausa o la camarera se está llevando a alguien.
 // Si la camarera está descansando, cualquier clic la saca del trastero.
 public class ClickManager : MonoBehaviour
@@ -33,7 +35,21 @@ public class ClickManager : MonoBehaviour
 
     private void Update()
     {
-        if (Mouse.current == null || !Mouse.current.leftButton.wasPressedThisFrame) return;
+        if (Mouse.current == null) return;
+
+        // Clic derecho: cancelar todo lo que tenía apuntado
+        if (Mouse.current.rightButton.wasPressedThisFrame && !PauseMenu.IsPaused)
+        {
+            StoreroomManager sm = StoreroomManager.Instance;
+            if (sm == null || !sm.InputLocked)
+            {
+                Deselect();
+                waitress.ClearQueue();
+            }
+            return;
+        }
+
+        if (!Mouse.current.leftButton.wasPressedThisFrame) return;
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
         if (PauseMenu.IsPaused) return;
@@ -91,10 +107,11 @@ public class ClickManager : MonoBehaviour
             Deselect(); // clic en otra cosa: cancelamos la selección y seguimos normal
         }
 
+        // Si la cola está llena, el clic simplemente no se apunta (sin aviso; se explica en el tutorial)
         if (interactable != null)
-            waitress.GoInteract(interactable);
+            waitress.QueueInteract(interactable);
         else if (allowFloorMovement)
-            waitress.MoveTo(worldPos);
+            waitress.QueueMove(worldPos);
     }
 
     // Elige qué se ha clicado, con margen de error:

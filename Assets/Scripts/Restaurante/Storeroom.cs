@@ -9,4 +9,14 @@ public class Storeroom : Interactable
     {
         if (StoreroomManager.Instance != null) StoreroomManager.Instance.StartRest();
     }
+
+    // Mientras descansa, la camarera no sigue con la cola (sale con un clic o cuando la ira llega a 0)
+    public override bool HoldsWaitress =>
+        StoreroomManager.Instance != null && StoreroomManager.Instance.IsResting;
+
+    public override void ReleaseWaitress()
+    {
+        if (StoreroomManager.Instance != null && StoreroomManager.Instance.IsResting)
+            StoreroomManager.Instance.StopRest();
+    }
 }
