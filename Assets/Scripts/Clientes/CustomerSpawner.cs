@@ -4,6 +4,10 @@ using UnityEngine;
 // Crea grupos de clientes y los mete en la cola.
 // Regla: solo entra gente nueva si hay más mesas "libres" (sin nadie sentado,
 // aunque estén sucias) que grupos esperando en la cola.
+// Si el DayManager tiene Ajustes de dificultad (Assets/Datos/Dificultad), el ritmo sale de ahí:
+// - Depende de las mesas: más mesas = llegan más rápido.
+// - En la hora punta llegan el doble de rápido y entra gente aunque esté todo lleno (hasta llenar la cola).
+// Sin ajustes de dificultad, se usan los números de abajo tal cual.
 public class CustomerSpawner : MonoBehaviour
 {
     [Header("Referencias")]
@@ -14,7 +18,7 @@ public class CustomerSpawner : MonoBehaviour
     [Tooltip("Por dónde se van (puede ser el mismo que la entrada)")]
     [SerializeField] private Transform exitPoint;
 
-    [Header("Ritmo de llegada (editable por diseño)")]
+    [Header("Ritmo de llegada (solo si NO hay Ajustes de dificultad en el DayManager)")]
     [SerializeField] private float firstSpawnDelay = 2f;
     [SerializeField] private float minSpawnInterval = 10f;
     [SerializeField] private float maxSpawnInterval = 16f;
@@ -48,7 +52,7 @@ public class CustomerSpawner : MonoBehaviour
         if (CanSpawn())
         {
             Spawn();
-            timer = Random.Range(minSpawnInterval, maxSpawnInterval);
+            timer = NextInterval();
         }
         else
         {
@@ -56,9 +60,25 @@ public class CustomerSpawner : MonoBehaviour
         }
     }
 
+    private DifficultySettings Difficulty => DayManager.Instance != null ? DayManager.Instance.Difficulty : null;
+    private bool IsRush => DayManager.Instance != null && DayManager.Instance.IsRushHour;
+
+    private float NextInterval()
+    {
+        DifficultySettings d = Difficulty;
+        if (d == null) return Random.Range(minSpawnInterval, maxSpawnInterval);
+
+        float interval = Random.Range(d.minSpawnInterval, d.maxSpawnInterval) * d.SpawnIntervalScale(tables.Count);
+        if (IsRush) interval /= d.rushMultiplier;
+        return interval;
+    }
+
     private bool CanSpawn()
     {
-        return !queue.IsFull && queue.Count < CountFreeTables();
+        if (queue.IsFull) return false;
+        DifficultySettings d = Difficulty;
+        if (d != null && d.rushIgnoresFreeTables && IsRush) return true; // hora punta: entra gente aunque esté lleno
+        return queue.Count < CountFreeTables();
     }
 
     private int CountFreeTables()
@@ -71,7 +91,8 @@ public class CustomerSpawner : MonoBehaviour
 
     private void Spawn()
     {
-        int size = Random.value < chanceOfPair ? 2 : 1;
+        float pair = Difficulty != null ? Difficulty.chanceOfPair : chanceOfPair;
+        int size = Random.value < pair ? 2 : 1;
 
         CustomerLook[] chosen = new CustomerLook[size];
         if (looks != null && looks.Length > 0)

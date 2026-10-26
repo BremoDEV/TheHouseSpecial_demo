@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a3129b9b5b363c459e6a19c94da00b4, type: 3}
+  m_Name: Dificultad
+  m_EditorClassIdentifier: Assembly-CSharp::DifficultySettings
+  referenceTables: 5
+  minSpawnInterval: 10
+  maxSpawnInterval: 16
+  chanceOfPair: 0.5
+  rushStartHour: 17.5
+  rushEndHour: 20
+  rushMultiplier: 2
+  rushIgnoresFreeTables: 1
+  referenceDay: 3
+  patienceChangePerDay: 0.1
+  minPatience: 0.3
+  rageIncreasePerHour: 0.02

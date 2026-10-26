@@ -18,7 +18,7 @@ using UnityEngine.UI;
 public class TutorialManager : MonoBehaviour
 {
     [Header("Escena a la que se va al terminar o al saltar el tutorial")]
-    [SerializeField] private string gameSceneName = "Demo_Restaurante";
+    [SerializeField] private string gameSceneName = "Dia_1";
 
     [Header("Interfaz del tutorial")]
     [SerializeField] private GameObject panel;
@@ -326,6 +326,8 @@ public class TutorialManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         GameTime.Frozen = false;
+        PlayerPrefs.SetInt(MainMenu.TutorialSeenKey, 1); // a partir de ahora, Jugar va directo al día 1
+        PlayerPrefs.Save();
         SceneManager.LoadScene(gameSceneName);
     }
 }

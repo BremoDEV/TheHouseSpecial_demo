@@ -223,6 +223,7 @@ public class WaitressController : MonoBehaviour
             StartNext();
 
         if (!isMoving) return;
+        if (path.Count == 0) { isMoving = false; return; } // por seguridad (p. ej. tras recompilar en Play)
 
         Vector2 target = path[0]; // siguiente punto del camino
         Vector2 now = transform.position;

@@ -189,6 +189,7 @@ public class Customer : MonoBehaviour
     private void Update()
     {
         if (!hasTarget) return;
+        if (path.Count == 0) { hasTarget = false; return; } // por seguridad (p. ej. tras recompilar en Play)
 
         float dt = IgnoreFreeze ? Time.deltaTime : GameTime.Delta;
         Vector2 target = path[0];

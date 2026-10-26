@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 // Segunda parte del montador: el TUTORIAL y el MENÚ PRINCIPAL.
 // Uso: menú  Tools → The House Special → Montar tutorial y menú principal
-// - Copia la escena Demo_Restaurante tal y como la tengas guardada (con tus cambios) a Assets/Escenas/Tutorial,
+// - Copia la escena Dia_3 tal y como la tengas guardada (con tus cambios) a Assets/Escenas/Tutorial,
 //   le deja una sola mesa, apaga el reloj y añade el TutorialManager con su panel, botones y flecha.
 // - Crea Assets/Escenas/MenuPrincipal con los botones Tutorial / Jugar / Salir.
 // - Ordena las escenas en Build Profiles: Menú → Tutorial → Demo.
@@ -54,7 +54,7 @@ public static partial class DemoSceneBuilder
             EditorUtility.DisplayDialog("¡Listo!",
                 "Creadas Assets/Escenas/MenuPrincipal y Assets/Escenas/Tutorial.\n\n" +
                 "Está abierto el menú principal: dale a Play para probarlo todo desde el principio.\n\n" +
-                "Para seguir editando el restaurante, vuelve a abrir Assets/Escenas/Demo_Restaurante.", "Vale");
+                "Para seguir editando el restaurante, vuelve a abrir Assets/Escenas/Dia_3.", "Vale");
         }
         catch (System.Exception e)
         {
@@ -426,7 +426,7 @@ public static partial class DemoSceneBuilder
     {
         if (Object.FindAnyObjectByType<PauseMenu>() == null)
         {
-            EditorUtility.DisplayDialog("Menú de pausa", "Abre primero la escena Demo_Restaurante.", "Vale");
+            EditorUtility.DisplayDialog("Menú de pausa", "Abre primero la escena Dia_3.", "Vale");
             return;
         }
         uiLayer = LayerMask.NameToLayer("UI");
@@ -469,11 +469,6 @@ public static partial class DemoSceneBuilder
     // Orden: Menú (el que sale al abrir el juego) → Tutorial → Demo → el resto
     private static void AddMenuAndTutorialToBuild()
     {
-        var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-        scenes.RemoveAll(s => s.path == MenuScenePath || s.path == TutorialScenePath || s.path == ScenePath);
-        scenes.Insert(0, new EditorBuildSettingsScene(MenuScenePath, true));
-        scenes.Insert(1, new EditorBuildSettingsScene(TutorialScenePath, true));
-        scenes.Insert(2, new EditorBuildSettingsScene(ScenePath, true));
-        EditorBuildSettings.scenes = scenes.ToArray();
+        SetBuildScenes(); // Menú → Tutorial → Día 1 … Día 5
     }
 }

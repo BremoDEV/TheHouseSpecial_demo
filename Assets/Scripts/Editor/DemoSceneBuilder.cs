@@ -11,8 +11,8 @@ using UnityEngine.UI;
 
 // Monta automáticamente una escena jugable de la demo con formas de colores.
 // Uso: menú  Tools → The House Special → Montar escena demo
-// Crea (o reemplaza) la escena Assets/Escenas/Demo_Restaurante con: sprites básicos, los 9 productos,
-// los prefabs (cliente, producto en barra, botón del TPV) y la escena Demo_Restaurante.
+// Crea (o reemplaza) la escena Assets/Escenas/Dia_3 con: sprites básicos, los 9 productos,
+// los prefabs (cliente, producto en barra, botón del TPV) y la escena Dia_3.
 // No toca tus otras escenas ni carpetas.
 public static partial class DemoSceneBuilder
 {
@@ -20,7 +20,7 @@ public static partial class DemoSceneBuilder
     private const string SpritesFolder = "Assets/Arte/Generados";   // formas básicas y recortes automáticos
     private const string DataFolder = "Assets/Datos/Productos";      // productos de la carta
     private const string PrefabsFolder = "Assets/Prefabs";
-    private const string ScenePath = "Assets/Escenas/Demo_Restaurante.unity";
+    private const string ScenePath = "Assets/Escenas/Dia_3.unity"; // la antigua Demo_Restaurante (ver DemoSceneBuilder.Dias)
 
     private static Sprite square, circle, capsule;
     private static Kitchen builtKitchen;
@@ -35,7 +35,7 @@ public static partial class DemoSceneBuilder
     public static void Build()
     {
         if (!EditorUtility.DisplayDialog("Montar escena demo",
-                "OJO: se va a REHACER DESDE CERO la escena Demo_Restaurante (y sus prefabs y productos).\n" +
+                "OJO: se va a REHACER DESDE CERO la escena Dia_3 (y sus prefabs y productos).\n" +
                 "Perderás los cambios hechos a mano en esa escena. Normalmente NO hace falta: usa los otros botones.\n\n" +
                 "¿Seguimos?", "Rehacer", "Cancelar"))
             return;
@@ -91,7 +91,7 @@ public static partial class DemoSceneBuilder
 
             EditorUtility.ClearProgressBar();
             EditorUtility.DisplayDialog("¡Listo!",
-                "Escena creada en Assets/Escenas/Demo_Restaurante.\n\n" +
+                "Escena creada en Assets/Escenas/Dia_3.\n\n" +
                 "Dale a Play. Mira la Console si algo no funciona.\n\n" +
                 "Los productos están en Assets/Datos/Productos y los prefabs en Assets/Prefabs.", "A jugar");
         }
@@ -1171,12 +1171,6 @@ public static partial class DemoSceneBuilder
 
     private static void AddSceneToBuild()
     {
-        var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
-        scenes.RemoveAll(s => s.path == ScenePath);
-        // Si ya existe el menú principal, la partida va después del menú y del tutorial
-        int index = scenes.FindIndex(s => s.path == TutorialScenePath);
-        if (index < 0) index = scenes.FindIndex(s => s.path == MenuScenePath);
-        scenes.Insert(index + 1, new EditorBuildSettingsScene(ScenePath, true));
-        EditorBuildSettings.scenes = scenes.ToArray();
+        SetBuildScenes(); // Menú → Tutorial → Día 1 … Día 5
     }
 }

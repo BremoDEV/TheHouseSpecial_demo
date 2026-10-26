@@ -48,8 +48,12 @@ public class RageMeter : MonoBehaviour
     {
         if (amount <= 0f || IsFull || IgnoreRage) return;
 
+        // Según pasan las horas, la ira sube más rápido (+2 %/hora por defecto)
+        if (DayManager.Instance != null) amount *= DayManager.Instance.RageMultiplier;
+
         currentRage = Mathf.Min(maxRage, currentRage + amount);
         if (source != null) LastRageSource = source;
+        DayStats.RageLevel(Normalized);
         UpdateUI();
 
         if (IsFull)

@@ -46,7 +46,7 @@ public static partial class DemoSceneBuilder
     {
         if (GameObject.Find("Suelo") == null || GameObject.Find("Barra") == null)
         {
-            EditorUtility.DisplayDialog("Reorganizar", "Abre primero la escena Demo_Restaurante.", "Vale");
+            EditorUtility.DisplayDialog("Reorganizar", "Abre primero la escena Dia_3.", "Vale");
             return;
         }
         if (square == null) square = AssetDatabase.LoadAssetAtPath<Sprite>(SpritesFolder + "/Cuadrado.png");

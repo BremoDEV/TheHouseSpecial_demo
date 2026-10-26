@@ -7511,7 +7511,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92c30e8df99752b479de29279707f47f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TutorialManager
-  gameSceneName: Demo_Restaurante
+  gameSceneName: Dia_1
   panel: {fileID: 90369385}
   messageText: {fileID: 544233861}
   continueButton: {fileID: 1725442290}
@@ -8901,6 +8901,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 056bed80614cf104383b6311b4251598, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DayManager
+  dayNumber: 1
+  nextDayScene: 
+  firstDayScene: Dia_1
+  menuScene: MenuPrincipal
+  difficulty: {fileID: 0}
   dayDurationSeconds: 480
   openingHour: 12
   closingHour: 20
@@ -8909,7 +8914,13 @@ MonoBehaviour:
   endPanel: {fileID: 196179647}
   endTitleText: {fileID: 394389516}
   endDetailText: {fileID: 199818276}
+  endValuesText: {fileID: 0}
+  endDayText: {fileID: 0}
+  endTotalText: {fileID: 0}
+  failStamp: {fileID: 0}
   retryButton: {fileID: 1504614055}
+  retryButtonLabel: {fileID: 0}
+  menuButton: {fileID: 0}
 --- !u!114 &1760176572
 MonoBehaviour:
   m_ObjectHideFlags: 0

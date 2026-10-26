@@ -743,7 +743,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainMenu
   tutorialSceneName: Tutorial
-  gameSceneName: Demo_Restaurante
+  gameSceneName: Dia_1
   tutorialButton: {fileID: 3284192}
   playButton: {fileID: 739203196}
   quitButton: {fileID: 1979800833}

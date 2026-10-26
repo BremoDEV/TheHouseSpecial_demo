@@ -342,6 +342,10 @@ public class CustomerGroup : MonoBehaviour
     // Cambia de fase: aquí se decide qué paciencia tiene, qué aviso enseña, etc.
     private void EnterState(GroupState newState)
     {
+        // Estadística: cuánta paciencia le quedaba cuando le has atendido (pasa a la siguiente fase)
+        if (draining && newState != GroupState.Leaving && newState != GroupState.BeingTaken)
+            DayStats.Patience(PatienceNormalized);
+
         State = newState;
         draining = false;
         SetAlert(AlertType.None);
@@ -370,6 +374,8 @@ public class CustomerGroup : MonoBehaviour
 
     private void StartPatience(float seconds)
     {
+        // Cada día los clientes tienen menos paciencia (la camarera está más quemada)
+        if (DayManager.Instance != null) seconds *= DayManager.Instance.PatienceMultiplier;
         phaseDuration = Mathf.Max(0.1f, seconds);
         patienceLeft = phaseDuration;
         draining = true;
@@ -470,6 +476,8 @@ public class CustomerGroup : MonoBehaviour
             GameMessages.Show(tip > 0f ? $"+{moneyOwed:0} € y {tip:0} € de propina" : $"+{moneyOwed:0} €");
             if (tip > 0f) MoneyManager.Instance.Add(tip, $"propina de {name}");
         }
+        DayStats.Patience(PatienceNormalized);
+        DayStats.Served(Size, tip);
         moneyOwed = 0f;
         Leave();
     }
@@ -518,6 +526,7 @@ public class CustomerGroup : MonoBehaviour
             Debug.Log($"{name}: se cansan de esperar en la cola y se van.");
             GameMessages.Show("Un grupo se ha cansado de esperar en la cola");
             if (RageMeter.Instance != null) RageMeter.Instance.AddRage(rageOnLeaveQueue, this); // sin reducir
+            DayStats.LeftQueue(Size);
         }
         else
         {
@@ -527,8 +536,10 @@ public class CustomerGroup : MonoBehaviour
             if (lost > 0f && MoneyManager.Instance != null)
                 MoneyManager.Instance.Add(-lost, $"{name} se va sin pagar");
             AddRage(rageOnLeaveTable + lost * ragePerMoneyLost);
+            DayStats.DineAndDash(Size, lost);
             moneyOwed = 0f;
         }
+        DayStats.Patience(0f);
         Leave();
     }
 

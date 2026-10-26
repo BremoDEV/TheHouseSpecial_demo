@@ -86,6 +86,7 @@ public class StoreroomManager : MonoBehaviour
     {
         if (IsKilling || IsResting) return;
         IsResting = true;
+        DayStats.Rested();
         restHadRage = false;
         waitress.SetVisible(false);
         Debug.Log("La camarera entra al trastero a respirar...");
@@ -157,6 +158,7 @@ public class StoreroomManager : MonoBehaviour
         // 4. Resultado: plato especial, contador del día y fuera
         if (Kitchen.Instance != null) Kitchen.Instance.OnCustomerKilled(victim.MemberTypes);
         if (DayManager.Instance != null) DayManager.Instance.RegisterKill();
+        DayStats.Killed(victim.Size);
         Destroy(victim.gameObject);
 
         RageMeter.Instance.SetRage(rageAfterKill);

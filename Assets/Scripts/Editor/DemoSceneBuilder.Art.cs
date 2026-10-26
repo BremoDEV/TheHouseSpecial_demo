@@ -4,7 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 // Arte de comida y bebida (carpeta Assets/Arte).
-// Uso: menú  Tools → The House Special → Aplicar arte de comida y bebida  (con Demo_Restaurante abierta)
+// Uso: menú  Tools → The House Special → Aplicar arte de comida y bebida  (con Dia_3 abierta)
 // - Ajusta la importación de los PNG (pixel art: sin suavizado, 128 píxeles = 1 unidad).
 // - Carta de la demo: Agua, Vino, Brochetas de carne y Pollo asado, cada uno con su dibujo.
 // - Platos especiales: Pájaro azul → Pollo con plumas azules; Loba → Brocheta de la casa.
@@ -67,7 +67,7 @@ public static partial class DemoSceneBuilder
     {
         if (Object.FindAnyObjectByType<Kitchen>() == null)
         {
-            EditorUtility.DisplayDialog("Aplicar arte", "Abre primero la escena Demo_Restaurante.", "Vale");
+            EditorUtility.DisplayDialog("Aplicar arte", "Abre primero la escena Dia_3.", "Vale");
             return;
         }
         if (!AssetDatabase.IsValidFolder(ArtFolder))
