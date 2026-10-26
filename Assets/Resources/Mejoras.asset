@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b5ce686d61f8dd4e8314e4008083614, type: 3}
+  m_Name: Mejoras
+  m_EditorClassIdentifier: Assembly-CSharp::UpgradeCatalog
+  upgrades:
+  - id: 0
+    displayName: Bandeja ampliada
+    description: "Lleva m\xE1s platos en un mismo viaje."
+    prices: 3200000064000000i
+    levelEffects:
+    - 3 platos
+    - 4 platos
+    icons:
+    - {fileID: 21300000, guid: 9603a80c951020f4a83986a755d4f5df, type: 3}
+  - id: 1
+    displayName: "Televisi\xF3n"
+    description: "Los clientes sentados pierden la paciencia m\xE1s despacio."
+    prices: 2800000050000000i
+    levelEffects:
+    - "-10 % de p\xE9rdida"
+    - "-20 % de p\xE9rdida"
+    icons:
+    - {fileID: 21300000, guid: d54fa274ae1195842b168a3a10e21389, type: 3}
+    - {fileID: 21300000, guid: 387cf30c2e63f2945813e8f1f6c81780, type: 3}
+  - id: 2
+    displayName: "TPV port\xE1til"
+    description: Haz comandas y saca cuentas desde cualquier sitio.
+    prices: 78000000i
+    levelEffects:
+    - Acceso remoto a la TPV
+    icons:
+    - {fileID: 21300000, guid: b227a6722a012714fa38e8143f5c34e9, type: 3}
+  - id: 3
+    displayName: Mostrador ampliado
+    description: "M\xE1s huecos en la barra y m\xE1s pedidos a la vez."
+    prices: 3200000064000000i
+    levelEffects:
+    - 4 huecos (6 pedidos)
+    - 6 huecos (8 pedidos)
+    icons:
+    - {fileID: 21300000, guid: 950b376774b874d438e3cd74e9f0f055, type: 3}
+  - id: 4
+    displayName: Equipamiento de cocina
+    description: "El cocinero prepara cada plato m\xE1s r\xE1pido."
+    prices: 50000000i
+    levelEffects:
+    - -20 % de tiempo por plato
+    icons:
+    - {fileID: 21300000, guid: 899a5da6bf0e1024caab6630ec93b288, type: 3}
+  - id: 5
+    displayName: "Zapatos c\xF3modos"
+    description: "La camarera se mueve m\xE1s r\xE1pido."
+    prices: 3c000000i
+    levelEffects:
+    - +15 % de velocidad
+    icons:
+    - {fileID: 21300000, guid: fb7b0c095a3028a4185dce63448dd9a8, type: 3}
+  trayCapacity: 020000000300000004000000i
+  patienceDrainMult:
+  - 1
+  - 0.9
+  - 0.8
+  counterCapacity: 020000000400000006000000i
+  cookTimeMult: 0.8
+  moveSpeedMult: 1.15

@@ -487,7 +487,9 @@ public class CustomerGroup : MonoBehaviour
     private void Drain()
     {
         if (PatiencePaused) return;
-        patienceLeft -= GameTime.Delta;
+        // La televisión entretiene a los que están sentados (los de la cola no la ven)
+        float drain = State == GroupState.InQueue ? 1f : Upgrades.PatienceDrainMult;
+        patienceLeft -= GameTime.Delta * drain;
         UpdateMood();
 
         float ragePerSecond = Mood switch
@@ -525,7 +527,8 @@ public class CustomerGroup : MonoBehaviour
         {
             Debug.Log($"{name}: se cansan de esperar en la cola y se van.");
             GameMessages.Show("Un grupo se ha cansado de esperar en la cola");
-            if (RageMeter.Instance != null) RageMeter.Instance.AddRage(rageOnLeaveQueue, this); // sin reducir
+            float queueScale = DayManager.Instance != null ? DayManager.Instance.QueueRageScale : 1f;
+            if (RageMeter.Instance != null) RageMeter.Instance.AddRage(rageOnLeaveQueue * queueScale, this);
             DayStats.LeftQueue(Size);
         }
         else
@@ -601,7 +604,11 @@ public class CustomerGroup : MonoBehaviour
 
     private void AddRage(float amount)
     {
-        if (State == GroupState.InQueue) amount *= queueRageMultiplier;
+        if (State == GroupState.InQueue)
+        {
+            amount *= queueRageMultiplier;
+            if (DayManager.Instance != null) amount *= DayManager.Instance.QueueRageScale; // ajuste global (Dificultad)
+        }
         if (RageMeter.Instance != null) RageMeter.Instance.AddRage(amount, this);
     }
 }

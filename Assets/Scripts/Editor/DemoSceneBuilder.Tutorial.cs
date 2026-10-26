@@ -293,6 +293,8 @@ public static partial class DemoSceneBuilder
     {
         string ui = UiArtFolder + "/" + fileName + ".png";
         if (AssetImporter.GetAtPath(ui) != null) return ui;
+        string shop = UiArtFolder + "/Tienda/" + fileName + ".png"; // arte de la interfaz de la tienda
+        if (AssetImporter.GetAtPath(shop) != null) return shop;
         return MenuArtFolder + "/" + fileName + ".png";
     }
 

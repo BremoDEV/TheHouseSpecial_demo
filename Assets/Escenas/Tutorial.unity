@@ -6555,6 +6555,8 @@ MonoBehaviour:
   dirtyDishesIcon: {fileID: 21300000, guid: bdb6605d00c9338418b12b80d630bb77, type: 3}
   dirtyDishesColor: {r: 0.45, g: 0.35, b: 0.25, a: 1}
   artSize: 0.6
+  traySpacing: 0.6
+  trayOffsetY: -0.32
 --- !u!210 &1280350470
 SortingGroup:
   m_ObjectHideFlags: 0
@@ -8905,6 +8907,7 @@ MonoBehaviour:
   nextDayScene: 
   firstDayScene: Dia_1
   menuScene: MenuPrincipal
+  shopScene: Tienda
   difficulty: {fileID: 0}
   dayDurationSeconds: 480
   openingHour: 12
@@ -8917,6 +8920,7 @@ MonoBehaviour:
   endValuesText: {fileID: 0}
   endDayText: {fileID: 0}
   endTotalText: {fileID: 0}
+  endFooterText: {fileID: 0}
   failStamp: {fileID: 0}
   retryButton: {fileID: 1504614055}
   retryButtonLabel: {fileID: 0}
@@ -9630,6 +9634,7 @@ MonoBehaviour:
     variant: {fileID: 11400000, guid: 91c2390b9377d5049926613d7fcc440a, type: 2}
   drinkPrepTime: 3
   foodPrepTime: 8
+  maxPendingOrders: 8
   drinkSpoilTime: 25
   foodSpoilTime: 30
   counterSlots:

@@ -25,6 +25,8 @@ public class DayManager : MonoBehaviour
     [SerializeField] private string firstDayScene = "Dia_1";
     [Tooltip("Escena del menú principal")]
     [SerializeField] private string menuScene = "MenuPrincipal";
+    [Tooltip("Escena de la tienda de mejoras (entre un día y el siguiente). Vacío = sin tienda")]
+    [SerializeField] private string shopScene = "Tienda";
 
     [Header("Dificultad (compartida por todos los días)")]
     [Tooltip("Assets/Datos/Dificultad: llegada de clientes por mesa, hora punta, paciencia por día e ira por hora")]
@@ -54,6 +56,8 @@ public class DayManager : MonoBehaviour
     [SerializeField] private TMP_Text endDayText;
     [Tooltip("Fila del TOTAL (columna derecha)")]
     [SerializeField] private TMP_Text endTotalText;
+    [Tooltip("Línea pequeña del final del ticket: ahorros para la tienda (o '¡Gracias por su visita!')")]
+    [SerializeField] private TMP_Text endFooterText;
     [Tooltip("Sello rojo de DESPEDIDA (solo sale si fallas)")]
     [SerializeField] private GameObject failStamp;
     [Tooltip("Botón principal: Siguiente día / Volver a empezar / Menú principal")]
@@ -79,8 +83,13 @@ public class DayManager : MonoBehaviour
     // Paciencia de los clientes de este día (1 = la del prefab)
     public float PatienceMultiplier => difficulty != null ? difficulty.PatienceMultiplier(dayNumber) : 1f;
 
-    // La ira sube más rápido según pasan las horas (1 = normal)
-    public float RageMultiplier => difficulty != null ? 1f + difficulty.rageIncreasePerHour * HoursElapsed : 1f;
+    // La ira sube según el día (días 1-2 más suave) y más rápido según pasan las horas (1 = normal)
+    public float RageMultiplier => difficulty != null
+        ? difficulty.RageDayMultiplier(dayNumber) * (1f + difficulty.rageIncreasePerHour * HoursElapsed)
+        : 1f;
+
+    // La ira que viene de la cola (no es culpa tuya que no haya mesas): reducida
+    public float QueueRageScale => difficulty != null ? difficulty.queueRageScale : 1f;
 
     private float elapsed;
     private bool success;
@@ -160,6 +169,9 @@ public class DayManager : MonoBehaviour
         float goal = MoneyManager.Instance != null ? MoneyManager.Instance.DailyGoal : 0f;
         success = money >= goal;
 
+        // Lo que te pasas del objetivo va a la hucha de la tienda (si no es el último día)
+        if (success && !IsLastDay) RunState.AddSavings(money - goal);
+
         Debug.Log($"Fin del día {dayNumber}. Dinero: {money:0} / {goal:0}. " +
                   $"Atendidos: {DayStats.CustomersServed}. Trastero: {DayStats.CustomersKilled}");
 
@@ -178,7 +190,7 @@ public class DayManager : MonoBehaviour
 
         // Botones
         if (retryButtonLabel != null)
-            retryButtonLabel.text = !success ? "Volver a empezar" : IsLastDay ? "Menú principal" : "Siguiente día";
+            retryButtonLabel.text = !success ? "Volver a empezar" : IsLastDay ? "Menú principal" : "Ir a la tienda";
         if (menuButton != null) menuButton.gameObject.SetActive(!success);
         // Con un solo botón, centrado; con dos, uno a cada lado
         if (retryButton != null && menuButton != null)
@@ -212,6 +224,10 @@ public class DayManager : MonoBehaviour
         Line("Paciencia media", DayStats.HasPatienceData ? $"{Mathf.RoundToInt(DayStats.AveragePatience * 100f)} %" : "-");
         Line("Ira máxima", $"{Mathf.RoundToInt(DayStats.MaxRage * 100f)} %");
         Line("Descansos en el trastero", DayStats.Rests.ToString());
+        if (endFooterText != null)
+            endFooterText.text = success && !IsLastDay
+                ? $"Ahorros para la tienda: {RunState.Savings:0} €"
+                : "¡Gracias por su visita!";
 
         if (endDetailText != null) endDetailText.text = string.Join("\n", labels);
         if (endValuesText != null) endValuesText.text = string.Join("\n", values);
@@ -221,14 +237,29 @@ public class DayManager : MonoBehaviour
     private void OnMainButton()
     {
         Time.timeScale = 1f;
-        if (!success) SceneManager.LoadScene(firstDayScene);  // despedida: vuelta al día 1
-        else if (IsLastDay) SceneManager.LoadScene(menuScene); // fin de la semana
-        else SceneManager.LoadScene(nextDayScene);
+        if (!success)
+        {
+            RunState.Reset(); // despedida: vuelta al día 1 sin mejoras ni ahorros
+            SceneManager.LoadScene(firstDayScene);
+        }
+        else if (IsLastDay)
+        {
+            RunState.Reset(); // fin de la semana
+            SceneManager.LoadScene(menuScene);
+        }
+        else
+        {
+            RunState.NextDayScene = nextDayScene;
+            RunState.NextDayNumber = dayNumber + 1;
+            bool hasShop = !string.IsNullOrEmpty(shopScene) && Application.CanStreamedLevelBeLoaded(shopScene);
+            SceneManager.LoadScene(hasShop ? shopScene : nextDayScene);
+        }
     }
 
     private void GoToMenu()
     {
         Time.timeScale = 1f;
+        RunState.Reset();
         SceneManager.LoadScene(menuScene);
     }
 

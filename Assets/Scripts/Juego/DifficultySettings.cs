@@ -39,6 +39,12 @@ public class DifficultySettings : ScriptableObject
     [Header("Ira")]
     [Tooltip("Cuánto más rápido sube la ira por cada hora del día que ha pasado: 0.02 = +2 %/hora (a las 20:00, +16 %)")]
     [Range(0f, 0.2f)] public float rageIncreasePerHour = 0.02f;
+    [Tooltip("Cuánto sube la ira cada día (1 = normal). Día 1 y 2 bajos para que casi nunca se llene; " +
+             "a partir del día 3 lo normal es llevarse a 1 o 2 clientes al trastero")]
+    public float[] rageByDay = { 0.6f, 0.8f, 1f, 1.1f, 1.2f };
+    [Tooltip("La ira que dan los clientes de la COLA (enfadarse esperando o irse) se multiplica por esto. " +
+             "0.5 = la mitad: sigue molestando, pero no es culpa tuya que no haya mesas")]
+    [Range(0f, 1f)] public float queueRageScale = 0.5f;
 
     // Multiplicador del tiempo entre grupos según las mesas (más mesas = menos tiempo)
     public float SpawnIntervalScale(int tables) => referenceTables / (float)Mathf.Max(1, tables);
@@ -47,4 +53,10 @@ public class DifficultySettings : ScriptableObject
         Mathf.Max(minPatience, 1f + (referenceDay - day) * patienceChangePerDay);
 
     public bool IsRushHour(float hour) => hour >= rushStartHour && hour < rushEndHour;
+
+    public float RageDayMultiplier(int day)
+    {
+        if (rageByDay == null || rageByDay.Length == 0) return 1f;
+        return rageByDay[Mathf.Clamp(day - 1, 0, rageByDay.Length - 1)];
+    }
 }

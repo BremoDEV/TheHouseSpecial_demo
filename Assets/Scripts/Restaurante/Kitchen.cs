@@ -17,8 +17,9 @@ public class SpecialVariant
 
 // La cocina: recibe los pedidos del TPV, los prepara de uno en uno
 // y los deja en la parte larga de la barra en L.
-// Límite: pedidos en cola + el que se está haciendo + los que hay en la barra
-// no pueden superar el número de huecos de la barra (así no se puede spamear).
+// Huecos de la barra: 2 de base (4 o 6 con la mejora "Mostrador ampliado"), aunque la escena tenga más.
+// Si la barra se llena, la cocina se para hasta que recojas algo, SIN perder los pedidos.
+// Límite de pedidos a la vez (en barra + en cocina) = huecos de la barra + 2: de base 4, luego 6 y luego 8.
 public class Kitchen : MonoBehaviour
 {
     public static Kitchen Instance { get; private set; }
@@ -32,6 +33,11 @@ public class Kitchen : MonoBehaviour
     [Header("Tiempos de preparación en segundos (editable por diseño)")]
     [SerializeField] private float drinkPrepTime = 3f;
     [SerializeField] private float foodPrepTime = 8f;
+
+    [Header("Pedidos (editable por diseño)")]
+    [Tooltip("Cuántos pedidos más que huecos de barra se pueden tener a la vez (barra + cocina). " +
+             "2 = con 2 huecos puedes tener 4 pedidos; con 4 huecos, 6; con 6 huecos, 8")]
+    [SerializeField] private int extraOrdersOverCounter = 2;
 
     [Header("Tiempo hasta que se pone malo en la barra (editable por diseño)")]
     [SerializeField] private float drinkSpoilTime = 25f;
@@ -51,8 +57,12 @@ public class Kitchen : MonoBehaviour
     public List<MenuItem> Drinks { get; } = new List<MenuItem>();
     public List<MenuItem> Foods { get; } = new List<MenuItem>();
 
-    public int Capacity => counterSlots.Length;
+    // Huecos que se pueden usar (según la mejora del mostrador, sin pasar de los que hay en la escena)
+    public int Capacity => Mathf.Clamp(Upgrades.CounterCapacity, 1, counterSlots.Length);
     public int UsedCapacity => pending.Count + (cooking != null ? 1 : 0) + CountOnCounter();
+    public int OnCounterCount => CountOnCounter();
+    public int InKitchenCount => pending.Count + (cooking != null ? 1 : 0);
+    public int MaxOrders => Capacity + extraOrdersOverCounter;
 
     private readonly Queue<MenuItem> pending = new Queue<MenuItem>();
     private MenuItem cooking;
@@ -80,10 +90,10 @@ public class Kitchen : MonoBehaviour
 
     public bool TryOrder(MenuItem item)
     {
-        if (UsedCapacity >= Capacity)
+        if (UsedCapacity >= MaxOrders)
         {
-            Debug.Log("¡La barra está llena! No se pueden pedir más cosas ahora.");
-            GameMessages.Show("¡Barra llena! Recoge lo que hay antes de pedir más");
+            Debug.Log("¡La cocina va a tope! No se pueden pedir más cosas ahora.");
+            GameMessages.Show("¡La cocina va a tope! Espera a que salgan platos");
             return false;
         }
         pending.Enqueue(item);
@@ -133,7 +143,7 @@ public class Kitchen : MonoBehaviour
             if (pending.Count > 0)
             {
                 cooking = pending.Dequeue();
-                cookTimer = cooking.category == ItemCategory.Drink ? drinkPrepTime : foodPrepTime;
+                cookTimer = (cooking.category == ItemCategory.Drink ? drinkPrepTime : foodPrepTime) * Upgrades.CookTimeMult;
             }
             return;
         }
@@ -142,7 +152,7 @@ public class Kitchen : MonoBehaviour
         if (cookTimer > 0f) return;
 
         int slot = FindFreeSlot();
-        if (slot < 0) return; // no debería pasar gracias al límite, pero por si acaso espera
+        if (slot < 0) return; // barra llena: el plato espera listo en cocina hasta que haya hueco
 
         PlaceOnCounter(cooking, slot);
         cooking = null;
@@ -164,7 +174,7 @@ public class Kitchen : MonoBehaviour
 
     private int FindFreeSlot()
     {
-        for (int i = 0; i < onCounter.Length; i++)
+        for (int i = 0; i < Capacity && i < onCounter.Length; i++)
             if (onCounter[i] == null) return i;
         return -1;
     }

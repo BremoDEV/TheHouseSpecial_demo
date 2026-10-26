@@ -76,7 +76,7 @@ public class WaitressController : MonoBehaviour
     public int MaxQueuedActions => maxQueuedActions;
 
     // Velocidad real ahora mismo (la base + el extra por ira)
-    public float CurrentSpeed => moveSpeed * (1f + GetRageBonus());
+    public float CurrentSpeed => moveSpeed * Upgrades.MoveSpeedMult * (1f + GetRageBonus()); // zapatos cómodos: +15 %
     public WaitressHands Hands { get; private set; }
 
     private void Awake()

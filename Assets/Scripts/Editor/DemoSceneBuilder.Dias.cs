@@ -239,7 +239,7 @@ public static partial class DemoSceneBuilder
         AddText("TotalEtiqueta", "TOTAL", 32f, bold, new Vector2(0f, -318f), new Vector2(510f, 42f), TextAlignmentOptions.MidlineLeft, TicketInk);
         var total = AddText("TotalValor", "0 €", 32f, bold, new Vector2(0f, -318f), new Vector2(510f, 42f), TextAlignmentOptions.MidlineRight, TicketInk);
         var thanks = AddText("Gracias", "¡Gracias por su visita!", 20f, regular, new Vector2(0f, -360f), new Vector2(510f, 28f),
-            TextAlignmentOptions.Center, faint);
+            TextAlignmentOptions.Center, new Color(TicketInk.r, TicketInk.g, TicketInk.b, 0.7f));
         thanks.fontStyle = FontStyles.Italic;
 
         // Sello rojo de DESPEDIDA (encima de los datos, torcido; solo sale si fallas)
@@ -277,6 +277,7 @@ public static partial class DemoSceneBuilder
         so.FindProperty("endDayText").objectReferenceValue = dayText;
         so.FindProperty("endTotalText").objectReferenceValue = total;
         so.FindProperty("failStamp").objectReferenceValue = stamp;
+        so.FindProperty("endFooterText").objectReferenceValue = thanks;
         so.FindProperty("retryButton").objectReferenceValue = main;
         so.FindProperty("retryButtonLabel").objectReferenceValue = main.GetComponentInChildren<TMP_Text>();
         so.FindProperty("menuButton").objectReferenceValue = menu;
@@ -292,6 +293,7 @@ public static partial class DemoSceneBuilder
     {
         var ordered = new List<string> { MenuScenePath, TutorialScenePath };
         for (int d = 1; d <= DayCount; d++) ordered.Add(DayScenePath(d));
+        ordered.Add(ScenesFolder + "/Tienda.unity"); // la tienda entre días
 
         var scenes = new List<EditorBuildSettingsScene>();
         foreach (string p in ordered)

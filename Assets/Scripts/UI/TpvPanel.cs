@@ -238,10 +238,10 @@ public class TpvPanel : MonoBehaviour
             return;
         }
 
-        // No dejamos apuntar más de lo que cabe en la barra
-        if (Kitchen.Instance.UsedCapacity + selection.Count >= Kitchen.Instance.Capacity)
+        // No dejamos apuntar más de lo que acepta la cocina
+        if (Kitchen.Instance.UsedCapacity + selection.Count >= Kitchen.Instance.MaxOrders)
         {
-            GameMessages.Show("¡No cabe más en la barra!");
+            GameMessages.Show("¡La cocina va a tope!");
             return;
         }
         selection.Add(item);
@@ -291,7 +291,7 @@ public class TpvPanel : MonoBehaviour
         if (statusText != null && Kitchen.Instance != null)
         {
             string extra = selection.Count > 0 ? $"  (+{selection.Count} en la comanda)" : "";
-            statusText.text = $"Barra: {Kitchen.Instance.UsedCapacity}/{Kitchen.Instance.Capacity}{extra}";
+            statusText.text = $"Barra: {Kitchen.Instance.OnCounterCount}/{Kitchen.Instance.Capacity} · Pedidos: {Kitchen.Instance.UsedCapacity}/{Kitchen.Instance.MaxOrders}{extra}";
         }
 
         if (selectionText != null)

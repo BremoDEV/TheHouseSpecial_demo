@@ -26,5 +26,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Escenas/Dia_5.unity
     guid: f87da203b64750e45b9e65a6da99c33f
+  - enabled: 1
+    path: Assets/Escenas/Tienda.unity
+    guid: f1c14cc631792854787b628887ff6ff3
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}

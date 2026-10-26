@@ -27,10 +27,13 @@ public class HeldItem
         type == HeldItemType.Product && product != null ? product.displayName : type.ToString();
 }
 
-// Las dos manos de la camarera. Va en el mismo objeto que WaitressController.
+// Lo que lleva la camarera. Va en el mismo objeto que WaitressController.
+// De base son 2 huecos (una cosa en cada mano). Con la mejora "Bandeja ampliada" pasan a 3 o 4
+// y se ve una bandeja debajo de las cosas que lleva.
 public class WaitressHands : MonoBehaviour
 {
-    public const int HandCount = 2;
+    // Máximo de huecos posible (con la bandeja a tope). Los que se usan de verdad: Capacity.
+    public const int HandCount = 4;
 
     [Tooltip("Dos iconos encima de la camarera (mano izquierda y derecha)")]
     [SerializeField] private SpriteRenderer[] handIcons = new SpriteRenderer[HandCount];
@@ -52,22 +55,35 @@ public class WaitressHands : MonoBehaviour
     [Tooltip("Tamaño (en unidades) de un objeto con dibujo en la mano. Sin dibujo se usa el cuadrado de siempre.")]
     [SerializeField] private float artSize = 0.6f;
 
+    [Header("Bandeja (mejora de la tienda)")]
+    [Tooltip("Separación entre las cosas de la bandeja cuando lleva 3 o 4")]
+    [SerializeField] private float traySpacing = 0.5f;
+    [Tooltip("Cuánto por debajo de las cosas va la bandeja")]
+    [SerializeField] private float trayOffsetY = -0.32f;
+
     private readonly HeldItem[] slots = new HeldItem[HandCount];
     private Sprite[] defaultSprites;   // el cuadrado de cada mano, para volver a él
     private Vector3[] defaultScales;
+    private SpriteRenderer trayRenderer;
+
+    // Huecos que se pueden usar ahora mismo (2 de base, 3 o 4 con la bandeja)
+    public int Capacity { get; private set; } = 2;
 
     public bool HasFreeHand
     {
         get
         {
-            foreach (HeldItem s in slots)
-                if (s == null) return true;
+            for (int i = 0; i < Capacity; i++)
+                if (slots[i] == null) return true;
             return false;
         }
     }
 
     private void Awake()
     {
+        Capacity = Mathf.Clamp(Upgrades.TrayCapacity, 1, HandCount);
+        if (Capacity > 2) SetUpTray();
+
         defaultSprites = new Sprite[handIcons.Length];
         defaultScales = new Vector3[handIcons.Length];
         for (int i = 0; i < handIcons.Length; i++)
@@ -87,7 +103,7 @@ public class WaitressHands : MonoBehaviour
 
     public bool TryAdd(HeldItem item)
     {
-        for (int i = 0; i < HandCount; i++)
+        for (int i = 0; i < Capacity; i++)
         {
             if (slots[i] == null)
             {
@@ -97,7 +113,7 @@ public class WaitressHands : MonoBehaviour
             }
         }
         Debug.Log("¡Manos llenas!");
-        GameMessages.Show("¡Manos llenas! Deja algo primero");
+        GameMessages.Show(Capacity > 2 ? "¡Bandeja llena! Deja algo primero" : "¡Manos llenas! Deja algo primero");
         return false;
     }
 
@@ -173,6 +189,63 @@ public class WaitressHands : MonoBehaviour
                 if (defaultScales != null && i < defaultScales.Length) r.transform.localScale = defaultScales[i];
                 r.color = color;
             }
+        }
+    }
+
+    // Con la bandeja: crea los huecos que faltan (copiando la mano derecha), los pone en fila
+    // y dibuja la bandeja debajo
+    private void SetUpTray()
+    {
+        if (handIcons == null || handIcons.Length == 0 || handIcons[0] == null) return;
+
+        var icons = new System.Collections.Generic.List<SpriteRenderer>(handIcons);
+        var labels = new System.Collections.Generic.List<TMP_Text>(handLabels ?? new TMP_Text[0]);
+        SpriteRenderer model = handIcons[handIcons.Length - 1] != null ? handIcons[handIcons.Length - 1] : handIcons[0];
+        while (icons.Count < Capacity)
+        {
+            SpriteRenderer copy = Instantiate(model, model.transform.parent);
+            copy.name = "Hand_" + (icons.Count + 1);
+            icons.Add(copy);
+            if (labels.Count > 0 && labels[labels.Count - 1] != null)
+            {
+                TMP_Text l = labels[labels.Count - 1];
+                TMP_Text lc = Instantiate(l, l.transform.parent);
+                lc.transform.localPosition = l.transform.localPosition + new Vector3(0f, 0.3f, 0f);
+                labels.Add(lc);
+            }
+        }
+        handIcons = icons.ToArray();
+        handLabels = labels.ToArray();
+
+        // En fila, centrados
+        float y = handIcons[0].transform.localPosition.y;
+        float startX = -(Capacity - 1) * traySpacing / 2f;
+        for (int i = 0; i < Capacity; i++)
+        {
+            Vector3 p = handIcons[i].transform.localPosition;
+            handIcons[i].transform.localPosition = new Vector3(startX + i * traySpacing, y, p.z);
+        }
+
+        // La bandeja (dibujo de la mejora, o una barra gris si no hay dibujo)
+        UpgradeDef def = UpgradeCatalog.Instance != null ? UpgradeCatalog.Instance.Get(UpgradeId.Bandeja) : null;
+        Sprite traySprite = def != null ? def.IconFor(RunState.Level(UpgradeId.Bandeja)) : null;
+        var go = new GameObject("Bandeja");
+        go.transform.SetParent(handIcons[0].transform.parent, false);
+        go.transform.localPosition = new Vector3(0f, y + trayOffsetY, 0f);
+        trayRenderer = go.AddComponent<SpriteRenderer>();
+        trayRenderer.sortingOrder = handIcons[0].sortingOrder - 1;
+        float width = Capacity * 0.4f + 0.1f; // 3 huecos = 1,3 unidades de ancho
+        if (traySprite != null)
+        {
+            trayRenderer.sprite = traySprite;
+            float s = width / Mathf.Max(0.01f, traySprite.bounds.size.x);
+            go.transform.localScale = new Vector3(s, s, 1f);
+        }
+        else
+        {
+            trayRenderer.sprite = handIcons[0].sprite;
+            trayRenderer.color = new Color(0.6f, 0.65f, 0.75f);
+            go.transform.localScale = new Vector3(width, 0.12f, 1f);
         }
     }
 

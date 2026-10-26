@@ -30,6 +30,7 @@ public class MainMenu : MonoBehaviour
 
     private void Play()
     {
+        RunState.Reset(); // partida nueva: sin mejoras ni ahorros
         bool seen = PlayerPrefs.GetInt(TutorialSeenKey, 0) == 1;
         SceneManager.LoadScene(seen ? gameSceneName : tutorialSceneName);
     }
