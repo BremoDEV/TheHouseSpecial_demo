@@ -28,8 +28,8 @@ public static partial class DemoSceneBuilder
 
     private static readonly Dictionary<int, Vector3[]> TableLayouts = new Dictionary<int, Vector3[]>
     {
-        { 3, new[] { new Vector3(-4.4f, 2.95f, 0f), new Vector3(1.8f, 2.95f, 0f), new Vector3(-1.3f, -3.5f, 0f) } },
-        { 4, new[] { new Vector3(-4.4f, 2.95f, 0f), new Vector3(1.8f, 2.95f, 0f),
+        { 3, new[] { new Vector3(-4.4f, TopTablesY, 0f), new Vector3(1.8f, TopTablesY, 0f), new Vector3(-1.3f, -3.5f, 0f) } },
+        { 4, new[] { new Vector3(-4.4f, TopTablesY, 0f), new Vector3(1.8f, TopTablesY, 0f),
                      new Vector3(-4.4f, -3.5f, 0f), new Vector3(1.8f, -3.5f, 0f) } },
     };
 

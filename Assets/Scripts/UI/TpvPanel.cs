@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 // La pantalla del TPV.
 // - Los botones de productos (se crean solos a partir de la carta) AÑADEN a una comanda.
 // - "Pedir" manda toda la comanda a cocina y cierra el panel.
-// - "Borrar" vacía la comanda. "Cuenta" saca una cuenta. "X" cierra sin pedir.
+// - "Borrar" vacía la comanda. "Cuenta" saca una cuenta. "X" o un clic fuera de la tablet cierran sin pedir.
+// - Abierta como TPV portátil, la camarera se queda quieta donde está y al cerrar sigue con su cola.
 // Va en el Canvas (que siempre está activo); el panel se asigna en "Root".
 // Sin botón "Pedir" asignado, cada producto se pide directamente al pulsarlo.
 public class TpvPanel : MonoBehaviour
@@ -54,9 +56,25 @@ public class TpvPanel : MonoBehaviour
     private readonly List<MenuItem> selection = new List<MenuItem>();
     private bool billTaken; // si se ha sacado una cuenta desde que se abrió (entonces "Pedir" sirve para cerrar)
 
+    private bool portable;                 // abierta desde la mejora TPV portátil
+    private int closedByClickFrame = -1;   // frame en el que se cerró con un clic fuera
+    private RectTransform toggleButton;    // botón del HUD que abre y cierra la TPV (su clic no cuenta como "fuera")
+    private RectTransform rootRect;
+    private Canvas canvas;
+
     private bool UsesOrderTicket => orderButton != null;
 
+    public static TpvPanel Instance { get; private set; }
+
     public bool IsOpen => root != null && root.activeSelf;
+
+    // El ClickManager no debe usar el clic mientras está abierta ni el clic que la acaba de cerrar
+    public bool ConsumesClick => IsOpen || closedByClickFrame == Time.frameCount;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -66,11 +84,14 @@ public class TpvPanel : MonoBehaviour
         if (orderButton != null) orderButton.onClick.AddListener(SendOrder);
         if (clearButton != null) clearButton.onClick.AddListener(ClearSelection);
         if (Kitchen.Instance != null) Kitchen.Instance.OnMenuChanged += RebuildButtons;
+        rootRect = root.GetComponent<RectTransform>();
+        canvas = root.GetComponentInParent<Canvas>();
         root.SetActive(false);
     }
 
     private void OnDestroy()
     {
+        if (Instance == this) Instance = null;
         if (Kitchen.Instance != null) Kitchen.Instance.OnMenuChanged -= RebuildButtons;
     }
 
@@ -198,9 +219,12 @@ public class TpvPanel : MonoBehaviour
         BuildButtons();
     }
 
-    public void Open(WaitressController w)
+    // portableMode = abierta desde la TPV portátil: la camarera se para pero no olvida lo que iba a hacer
+    public void Open(WaitressController w, bool portableMode = false)
     {
         waitress = w;
+        portable = portableMode;
+        if (portable && waitress != null) waitress.SetPaused(true);
         selection.Clear();
         billTaken = false;
         root.SetActive(true);
@@ -210,20 +234,47 @@ public class TpvPanel : MonoBehaviour
     public void Close()
     {
         selection.Clear(); // lo que no se haya pedido se descarta
+        if (portable && waitress != null) waitress.SetPaused(false);
+        portable = false;
         root.SetActive(false);
+    }
+
+    // El botón de la TPV portátil se registra para que pulsarlo con la TPV abierta la cierre (y no la vuelva a abrir)
+    public void RegisterToggleButton(RectTransform button)
+    {
+        toggleButton = button;
     }
 
     private void Update()
     {
         if (!root.activeSelf) return;
 
-        // Si la camarera se va del TPV, se cierra el panel
-        if (waitress != null && waitress.IsMoving)
+        // Clic fuera de la tablet: se cierra sin pedir
+        if (!PauseMenu.IsPaused && Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
+        {
+            Vector2 mouse = Mouse.current.position.ReadValue();
+            if (!IsOver(rootRect, mouse) && !IsOver(toggleButton, mouse))
+            {
+                closedByClickFrame = Time.frameCount;
+                Close();
+                return;
+            }
+        }
+
+        // Si la camarera se va del TPV del stand, se cierra el panel (con la portátil está parada, no se va)
+        if (!portable && waitress != null && waitress.IsMoving)
         {
             Close();
             return;
         }
         RefreshTexts();
+    }
+
+    private bool IsOver(RectTransform rt, Vector2 screenPoint)
+    {
+        if (rt == null || !rt.gameObject.activeInHierarchy) return false;
+        Camera cam = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+        return RectTransformUtility.RectangleContainsScreenPoint(rt, screenPoint, cam);
     }
 
     // ------------------------------------------------------------- COMANDA

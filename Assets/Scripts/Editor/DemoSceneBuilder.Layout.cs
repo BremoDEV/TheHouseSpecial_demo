@@ -28,9 +28,13 @@ public static partial class DemoSceneBuilder
     private const float BarTop = 0.1f;            // borde de arriba de la L
     private const float ShortBarHeight = 0.8f;
 
+    // Altura de las mesas de arriba: separadas de la pared lo justo para que los comentarios
+    // de los clientes sentados no queden debajo de la barra superior (ira, dinero, hora)
+    private const float TopTablesY = 1.9f;
+
     private static readonly Vector3[] LayoutTables =
     {
-        new Vector3(-5.4f, 2.95f, 0f), new Vector3(-1.2f, 2.95f, 0f), new Vector3(3.15f, 2.95f, 0f), // arriba
+        new Vector3(-5.4f, TopTablesY, 0f), new Vector3(-1.2f, TopTablesY, 0f), new Vector3(3.15f, TopTablesY, 0f), // arriba
         new Vector3(-5.0f, -3.5f, 0f), new Vector3(1.8f, -3.5f, 0f),                                  // abajo
     };
 

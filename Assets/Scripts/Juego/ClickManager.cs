@@ -9,6 +9,7 @@ using UnityEngine.InputSystem;
 // - Clic en algo interactuable -> se apunta en la cola: la camarera irá y lo usará.
 // - Clic en el suelo -> se apunta en la cola: la camarera caminará hasta ahí (y se cancela la selección).
 // - Clic derecho -> se borra la cola de acciones (la camarera se para).
+// - Con la TPV abierta, el clic izquierdo fuera de ella solo la cierra.
 // La cola tiene un máximo de acciones (en el WaitressController); si está llena, el clic se ignora (sin aviso).
 // No hace nada si el juego está en pausa o la camarera se está llevando a alguien.
 // Si la camarera está descansando, cualquier clic la saca del trastero.
@@ -51,6 +52,9 @@ public class ClickManager : MonoBehaviour
 
         if (!Mouse.current.leftButton.wasPressedThisFrame) return;
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
+
+        // Con la TPV abierta, el clic fuera solo sirve para cerrarla (lo gestiona el TpvPanel)
+        if (TpvPanel.Instance != null && TpvPanel.Instance.ConsumesClick) return;
 
         if (PauseMenu.IsPaused) return;
         if (DayManager.Instance != null && DayManager.Instance.IsDayOver) return;

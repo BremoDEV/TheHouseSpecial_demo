@@ -2077,7 +2077,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2378,7 +2378,7 @@ Transform:
   m_GameObject: {fileID: 313059018}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.15, y: 2.95, z: 0}
+  m_LocalPosition: {x: 3.15, y: 1.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5887,7 +5887,7 @@ Transform:
   m_GameObject: {fileID: 1061454715}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.2, y: 2.95, z: 0}
+  m_LocalPosition: {x: -1.2, y: 1.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10513,7 +10513,7 @@ MonoBehaviour:
   foodPrice: 10
   tipsEnabled: 1
   tipAmount: 2
-  dailyGoal: 240
+  dailyGoal: 220
   money: 0
   moneyText: {fileID: 2080611541}
 --- !u!114 &1760176574
@@ -13133,7 +13133,7 @@ Transform:
   m_GameObject: {fileID: 2009476143}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.4, y: 2.95, z: 0}
+  m_LocalPosition: {x: -5.4, y: 1.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

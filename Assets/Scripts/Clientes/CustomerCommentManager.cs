@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Tono del comentario. De momento solo sirve para clasificar las frases
-// (no cambia la paciencia ni la ira).
+// Tono del comentario. En los tipos de cliente con 'commentRage' (CustomerTraitsCatalog),
+// Annoying y Harassing suben la ira y Positive la baja. Neutral nunca la cambia.
 public enum CustomerCommentType
 {
     Neutral,
@@ -143,13 +143,19 @@ public class CustomerCommentManager : MonoBehaviour
                 if (customer == null || customer.IsCommentVisible)
                     continue;
 
-                CustomerCommentEntry entry = GetRandomComment();
+                // Cada tipo de cliente puede tener sus propias frases (ver CustomerTraitsCatalog)
+                CustomerTraits traits = group.TraitsOf(memberIndex);
+                CustomerCommentEntry entry = GetRandomComment(traits != null ? traits.comments : null)
+                                             ?? GetRandomComment(comments);
 
                 if (entry == null || string.IsNullOrWhiteSpace(entry.text))
                     continue;
 
                 if (!customer.ShowComment(entry.text))
                     continue;
+
+                // Los comentarios de algunos tipos suben (molestos) o bajan (positivos) la ira
+                if (traits != null) group.ApplyCommentRage(entry.type, traits.commentRage);
 
                 activeGroup = group;
                 activeCustomer = customer;
@@ -162,15 +168,16 @@ public class CustomerCommentManager : MonoBehaviour
         return false;
     }
 
-    private CustomerCommentEntry GetRandomComment()
+    // Una frase al azar de la lista (null si está vacía)
+    private static CustomerCommentEntry GetRandomComment(CustomerCommentEntry[] list)
     {
-        if (comments == null || comments.Length == 0)
+        if (list == null || list.Length == 0)
             return null;
 
-        for (int attempt = 0; attempt < comments.Length; attempt++)
+        for (int attempt = 0; attempt < list.Length; attempt++)
         {
             CustomerCommentEntry entry =
-                comments[UnityEngine.Random.Range(0, comments.Length)];
+                list[UnityEngine.Random.Range(0, list.Length)];
 
             if (entry != null && !string.IsNullOrWhiteSpace(entry.text))
                 return entry;

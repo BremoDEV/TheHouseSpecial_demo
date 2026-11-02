@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 827c1a99342dd6b4e969b1a9e205e4bf, type: 3}
+  m_Name: Clientes
+  m_EditorClassIdentifier: Assembly-CSharp::CustomerTraitsCatalog
+  types:
+  - typeName: "P\xE1jaro azul"
+    rageMultiplier: 1.05
+    patienceDrainMultiplier: 1.05
+    askMoreTimeChance: 0.15
+    moreTimeSeconds: 4
+    moreTimeComment: "\xA1Un momento, a\xFAn no s\xE9 qu\xE9 pedir!"
+    tipPercentMin: 0
+    tipPercentMax: 0
+    rageReliefMin: 0
+    rageReliefMax: 0
+    changeOrderChance: 0
+    changeOrderDelay: 3
+    changeOrderComment: Me lo he pensado mejor...
+    changeOrderTipPercent: 0
+    comments:
+    - text: "\xBFHoy toca servicio lento o es siempre as\xED?"
+      type: 3
+    - text: "\xBFTe pagan por estar parada?"
+      type: 3
+    - text: Menudo antro.
+      type: 3
+    - text: "Date prisa, que no tengo todo el d\xEDa."
+      type: 3
+    - text: En mi nido esto no pasaba.
+      type: 3
+    - text: "\xBFSabes lo que es una propina? Pues olv\xEDdate."
+      type: 3
+    - text: "Qu\xE9 sitio m\xE1s cutre."
+      type: 3
+    - text: "\xA1P\xEDo, p\xEDo! \xA1Que me muero de hambre!"
+      type: 3
+    commentRage: 2
+  - typeName: "H\xE1mster"
+    rageMultiplier: 0.95
+    patienceDrainMultiplier: 0.95
+    askMoreTimeChance: 0
+    moreTimeSeconds: 4
+    moreTimeComment: "\xA1Un momento, a\xFAn no s\xE9 qu\xE9 pedir!"
+    tipPercentMin: 2
+    tipPercentMax: 10
+    rageReliefMin: 1
+    rageReliefMax: 5
+    changeOrderChance: 0
+    changeOrderDelay: 3
+    changeOrderComment: Me lo he pensado mejor...
+    changeOrderTipPercent: 0
+    comments:
+    - text: "\xA1Qu\xE9 sitio tan bonito!"
+      type: 1
+    - text: "Sin prisa, \xA1lo est\xE1s haciendo genial!"
+      type: 1
+    - text: Muchas gracias por todo.
+      type: 1
+    - text: "\xA1Qu\xE9 bien huele aqu\xED!"
+      type: 1
+    - text: Se nota que trabajas mucho.
+      type: 1
+    - text: "\xA1Volveremos seguro!"
+      type: 1
+    - text: "Qu\xE9 amable eres."
+      type: 1
+    commentRage: 2
+  - typeName: Zorra
+    rageMultiplier: 1
+    patienceDrainMultiplier: 1
+    askMoreTimeChance: 0
+    moreTimeSeconds: 4
+    moreTimeComment: "\xA1Un momento, a\xFAn no s\xE9 qu\xE9 pedir!"
+    tipPercentMin: 0
+    tipPercentMax: 0
+    rageReliefMin: 0
+    rageReliefMax: 0
+    changeOrderChance: 0.15
+    changeOrderDelay: 3
+    changeOrderComment: Me lo he pensado mejor...
+    changeOrderTipPercent: 20
+    comments:
+    - text: El servicio es impecable.
+      type: 1
+    - text: "Una atenci\xF3n muy correcta, s\xED se\xF1or."
+      type: 1
+    - text: "Todo est\xE1 en su sitio. Me gusta."
+      type: 1
+    - text: Se agradece un servicio tan atento.
+      type: 1
+    - text: El servicio deja bastante que desear.
+      type: 2
+    - text: "Esperaba algo m\xE1s de profesionalidad."
+      type: 2
+    - text: "Habr\xEDa que revisar los tiempos de espera."
+      type: 2
+    - text: "Esta mesa no est\xE1 a la altura."
+      type: 2
+    commentRage: 2

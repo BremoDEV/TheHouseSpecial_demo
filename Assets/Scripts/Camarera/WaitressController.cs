@@ -71,6 +71,10 @@ public class WaitressController : MonoBehaviour
 
     public bool IsMoving => isMoving;
 
+    // Quieta mientras mira la TPV portátil: no camina ni actúa, pero conserva la cola para seguir al cerrarla
+    public bool Paused { get; private set; }
+    public void SetPaused(bool paused) => Paused = paused;
+
     // Acciones que tiene pendientes (la actual + las que esperan)
     public int PendingActions => queue.Count + (hasCurrent ? 1 : 0);
     public int MaxQueuedActions => maxQueuedActions;
@@ -122,6 +126,7 @@ public class WaitressController : MonoBehaviour
     // Borra todas las acciones y la deja quieta donde esté
     public void ClearQueue()
     {
+        Paused = false;
         ReleaseHold();
         queue.Clear();
         hasCurrent = false;
@@ -208,6 +213,8 @@ public class WaitressController : MonoBehaviour
 
     private void Update()
     {
+        if (Paused) return;
+
         // Esperando en la TPV o en el trastero: en cuanto el objeto la suelte, sigue con la cola
         if (holdingTarget != null)
         {

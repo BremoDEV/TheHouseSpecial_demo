@@ -145,6 +145,16 @@ public class CustomerGroup : MonoBehaviour
     private CustomerQueue queue;
     private Vector2 exitPosition;
 
+    // Comportamiento propio de cada miembro (null = cliente base) y su efecto sobre el grupo
+    private CustomerTraits[] memberTraits;
+    private float groupRageMultiplier = 1f;   // media de los miembros
+    private float groupDrainMultiplier = 1f;  // media de los miembros
+    private bool askedMoreTime;               // el "pedir más tiempo" solo pasa una vez por visita
+    private float[] orderChangeTimers;        // cuenta atrás para cambiar el pedido (-1 = no lo cambia)
+    private float changedOrderTipPercent;     // propina extra (%) de los que han cambiado el pedido
+    private float[] lineTimers;               // tiempo que le queda a cada frase propia (pedir tiempo, cambio de pedido)
+    private const float LineDuration = 3f;
+
     private void Awake()
     {
         All.Add(this);
@@ -172,6 +182,7 @@ public class CustomerGroup : MonoBehaviour
             members[i].SetOrder(null);
         }
 
+        SetupTraits();
         SetSelected(false);
         EnterState(GroupState.InQueue);
     }
@@ -231,8 +242,10 @@ public class CustomerGroup : MonoBehaviour
                 break;
 
             case GroupState.WantsToOrderFood:
+                if (TryAskMoreTime()) break;
                 TakeOrder(Kitchen.Instance.Foods);
                 EnterState(GroupState.WaitingForFood);
+                ScheduleOrderChanges();
                 break;
 
             case GroupState.WaitingForDrinks:
@@ -283,6 +296,7 @@ public class CustomerGroup : MonoBehaviour
 
         SetSelected(false);
         SetAlert(AlertType.None);
+        HideLines();
         draining = false;
         State = GroupState.BeingTaken;
     }
@@ -306,6 +320,7 @@ public class CustomerGroup : MonoBehaviour
         if (State == GroupState.BeingTaken) return; // lo controla el StoreroomManager
 
         if (draining) Drain();
+        TickTraitTimers();
 
         switch (State)
         {
@@ -477,6 +492,7 @@ public class CustomerGroup : MonoBehaviour
     private void Pay()
     {
         float tip = everAnnoyed || MoneyManager.Instance == null ? 0f : MoneyManager.Instance.TipAmount;
+        tip += TraitTipsAndRelief(moneyOwed);
         if (MoneyManager.Instance != null)
         {
             MoneyManager.Instance.Add(moneyOwed, $"{name} paga");
@@ -496,6 +512,7 @@ public class CustomerGroup : MonoBehaviour
         if (PatiencePaused) return;
         // La televisión entretiene a los que están sentados (los de la cola no la ven)
         float drain = State == GroupState.InQueue ? 1f : Upgrades.PatienceDrainMult;
+        drain *= groupDrainMultiplier; // hay clientes que se impacientan antes (o después) que otros
         patienceLeft -= GameTime.Delta * drain;
         UpdateMood();
 
@@ -535,7 +552,7 @@ public class CustomerGroup : MonoBehaviour
             Debug.Log($"{name}: se cansan de esperar en la cola y se van.");
             GameMessages.Show("Un grupo se ha cansado de esperar en la cola");
             float queueScale = DayManager.Instance != null ? DayManager.Instance.QueueRageScale : 1f;
-            if (RageMeter.Instance != null) RageMeter.Instance.AddRage(rageOnLeaveQueue * queueScale, this);
+            if (RageMeter.Instance != null) RageMeter.Instance.AddRage(rageOnLeaveQueue * queueScale * groupRageMultiplier, this);
             DayStats.LeftQueue(Size);
         }
         else
@@ -572,9 +589,150 @@ public class CustomerGroup : MonoBehaviour
         }
 
         SetSelected(false);
+        HideLines();
         EnterState(GroupState.Leaving);
 
         for (int i = 0; i < Size; i++) members[i].WalkTo(exitPosition);
+    }
+
+    // ================= Comportamiento de cada tipo de cliente =================
+
+    // Comportamiento de un miembro (null = cliente base). Lo usa el CustomerCommentManager.
+    public CustomerTraits TraitsOf(int index) =>
+        memberTraits != null && index >= 0 && index < Size ? memberTraits[index] : null;
+
+    // Busca el comportamiento de cada miembro en el catálogo y calcula la media del grupo
+    private void SetupTraits()
+    {
+        memberTraits = new CustomerTraits[members.Length];
+        orderChangeTimers = new float[members.Length];
+        lineTimers = new float[members.Length];
+        float rage = 0f, drain = 0f;
+        for (int i = 0; i < members.Length; i++)
+        {
+            orderChangeTimers[i] = -1f;
+            if (i >= Size) continue;
+            memberTraits[i] = CustomerTraitsCatalog.Get(members[i].TypeName);
+            rage += memberTraits[i] != null ? memberTraits[i].rageMultiplier : 1f;
+            drain += memberTraits[i] != null ? memberTraits[i].patienceDrainMultiplier : 1f;
+        }
+        groupRageMultiplier = Size > 0 ? rage / Size : 1f;
+        groupDrainMultiplier = Size > 0 ? drain / Size : 1f;
+        askedMoreTime = false;
+        changedOrderTipPercent = 0f;
+    }
+
+    // Pájaro azul: al ir a tomar nota de la comida, puede decir que aún no sabe y volver a mirar la carta
+    private bool TryAskMoreTime()
+    {
+        if (askedMoreTime) return false;
+        for (int i = 0; i < Size; i++)
+        {
+            CustomerTraits t = memberTraits[i];
+            if (t == null || t.askMoreTimeChance <= 0f || Random.value >= t.askMoreTimeChance) continue;
+
+            askedMoreTime = true;
+            SayLine(i, t.moreTimeComment);
+            GameMessages.Show("Aún no saben qué pedir: vuelve en un momento");
+            EnterState(GroupState.ChoosingFood);
+            stateTimer = Mathf.Max(0.5f, t.moreTimeSeconds);
+            return true;
+        }
+        return false;
+    }
+
+    // Zorra: después de pedir la comida puede cambiar de plato al cabo de unos segundos
+    private void ScheduleOrderChanges()
+    {
+        for (int i = 0; i < Size; i++)
+        {
+            CustomerTraits t = memberTraits[i];
+            if (t != null && t.changeOrderChance > 0f && Random.value < t.changeOrderChance)
+                orderChangeTimers[i] = Mathf.Max(0f, t.changeOrderDelay);
+        }
+    }
+
+    private void TickTraitTimers()
+    {
+        if (orderChangeTimers == null) return;
+        float dt = GameTime.Delta;
+        for (int i = 0; i < Size; i++)
+        {
+            if (orderChangeTimers[i] >= 0f)
+            {
+                if (State != GroupState.WaitingForFood) orderChangeTimers[i] = -1f;
+                else if ((orderChangeTimers[i] -= dt) <= 0f)
+                {
+                    orderChangeTimers[i] = -1f;
+                    ChangeOrder(i);
+                }
+            }
+
+            if (lineTimers[i] > 0f && (lineTimers[i] -= dt) <= 0f) members[i].HideComment();
+        }
+    }
+
+    // Cambia el plato que espera este miembro por otro distinto de la carta
+    private void ChangeOrder(int member)
+    {
+        if (memberOrders[member] == null || Kitchen.Instance == null) return; // ya le han servido
+        List<MenuItem> foods = Kitchen.Instance.Foods;
+        if (foods == null || foods.Count < 2) return;
+
+        MenuItem newOrder = null;
+        for (int attempt = 0; attempt < 20 && newOrder == null; attempt++)
+        {
+            MenuItem candidate = foods[Random.Range(0, foods.Count)];
+            if (!candidate.Matches(memberOrders[member])) newOrder = candidate;
+        }
+        if (newOrder == null) return;
+
+        memberOrders[member] = newOrder;
+        members[member].SetOrder(newOrder);
+        SayLine(member, memberTraits[member].changeOrderComment);
+        GameMessages.Show($"¡Ha cambiado su pedido! Ahora quiere {newOrder.displayName}");
+        changedOrderTipPercent += memberTraits[member].changeOrderTipPercent;
+        Debug.Log($"{name}: cambia su pedido a {newOrder.displayName}.");
+    }
+
+    // Propinas extra (Hámster, Zorra si cambió el pedido) y la ira que baja al pagar (Hámster)
+    private float TraitTipsAndRelief(float bill)
+    {
+        float share = Size > 0 ? bill / Size : 0f; // la parte de la cuenta de cada miembro
+        float tip = share * changedOrderTipPercent / 100f;
+        for (int i = 0; i < Size; i++)
+        {
+            CustomerTraits t = memberTraits[i];
+            if (t == null) continue;
+            if (t.tipPercentMax > 0f) tip += share * Random.Range(t.tipPercentMin, t.tipPercentMax) / 100f;
+            if (t.rageReliefMax > 0f && RageMeter.Instance != null)
+                RageMeter.Instance.ReduceRage(Random.Range(t.rageReliefMin, t.rageReliefMax));
+        }
+        return Mathf.Round(tip * 100f) / 100f;
+    }
+
+    // Lo llama el CustomerCommentManager después de que un miembro suelte un comentario
+    public void ApplyCommentRage(CustomerCommentType type, float amount)
+    {
+        if (amount <= 0f) return;
+        if (type == CustomerCommentType.Annoying || type == CustomerCommentType.Harassing) AddRage(amount);
+        else if (type == CustomerCommentType.Positive && RageMeter.Instance != null) RageMeter.Instance.ReduceRage(amount);
+    }
+
+    // Frase propia del cliente en su bocadillo de comentario (se quita sola a los pocos segundos)
+    private void SayLine(int member, string text)
+    {
+        if (string.IsNullOrWhiteSpace(text) || !members[member].ShowComment(text)) return;
+        lineTimers[member] = LineDuration;
+    }
+
+    private void HideLines()
+    {
+        for (int i = 0; i < Size; i++)
+        {
+            members[i].HideComment();
+            if (lineTimers != null) lineTimers[i] = 0f;
+        }
     }
 
     // ================= Visual y utilidades =================
@@ -611,6 +769,7 @@ public class CustomerGroup : MonoBehaviour
 
     private void AddRage(float amount)
     {
+        amount *= groupRageMultiplier;
         if (State == GroupState.InQueue)
         {
             amount *= queueRageMultiplier;
