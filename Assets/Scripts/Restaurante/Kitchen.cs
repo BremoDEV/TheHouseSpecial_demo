@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Plato especial: al "encargarte" de un cliente de cierto tipo, un plato se cambia por su variante.
+// Plato especial: al llevarse al trastero a un cliente de cierto tipo, un plato se cambia por su variante.
 // Ejemplo: tipo "Pájaro azul" -> Pollo asado se convierte en Pollo con plumas azules.
 [Serializable]
 public class SpecialVariant
@@ -18,7 +18,7 @@ public class SpecialVariant
 // La cocina: recibe los pedidos del TPV, los prepara de uno en uno
 // y los deja en la parte larga de la barra en L.
 // Huecos de la barra: 2 de base (4 o 6 con la mejora "Mostrador ampliado"), aunque la escena tenga más.
-// Si la barra se llena, la cocina se para hasta que recojas algo, SIN perder los pedidos.
+// Si la barra se llena, la cocina se para hasta que se recoja algo, SIN perder los pedidos.
 // Límite de pedidos a la vez (en barra + en cocina) = huecos de la barra + 2: de base 4, luego 6 y luego 8.
 public class Kitchen : MonoBehaviour
 {

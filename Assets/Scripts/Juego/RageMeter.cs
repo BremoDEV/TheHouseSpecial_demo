@@ -12,7 +12,7 @@ public class RageMeter : MonoBehaviour
     [Tooltip("Valor máximo de la barra")]
     [SerializeField] private float maxRage = 100f;
 
-    [Tooltip("Ira actual (puedes cambiarla en Play para probar)")]
+    [Tooltip("Ira actual (se puede cambiar en Play para probar)")]
     [SerializeField] private float currentRage = 0f;
 
     [Header("UI (opcional)")]
@@ -30,7 +30,7 @@ public class RageMeter : MonoBehaviour
     public float Normalized => currentRage / maxRage;
     public bool IsFull => currentRage >= maxRage;
 
-    // El último cliente que subió la ira: es el que te llevarás al trastero
+    // El último cliente que subió la ira: es el que la camarera se lleva al trastero
     public CustomerGroup LastRageSource { get; private set; }
 
     private void Awake()

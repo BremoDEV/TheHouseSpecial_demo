@@ -14,7 +14,7 @@ using UnityEngine.UI;
 // - La ira solo cambia cuando el tutorial quiere.
 // - No hay reloj ni fin de día (el DayManager está desactivado en esta escena).
 //
-// Para cambiar los textos o el orden: todo está en la corrutina RunTutorial, de arriba abajo.
+// Los textos y el orden de los pasos están en la corrutina RunTutorial, de arriba abajo.
 public class TutorialManager : MonoBehaviour
 {
     [Header("Escena a la que se va al terminar o al saltar el tutorial")]

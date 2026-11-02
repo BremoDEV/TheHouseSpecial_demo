@@ -5,8 +5,7 @@ using UnityEngine;
 // los clientes, la cocina, la barra y el reloj del día se paran,
 // pero la camarera (y el cliente que se lleva) siguen moviéndose.
 //
-// Regla para programar: en todo lo que deba pararse en ese momento,
-// usa GameTime.Delta en vez de Time.deltaTime.
+// Todo lo que deba pararse en ese momento usa GameTime.Delta en vez de Time.deltaTime.
 // (El menú de pausa es distinto: pone Time.timeScale = 0 y lo para TODO.)
 public static class GameTime
 {

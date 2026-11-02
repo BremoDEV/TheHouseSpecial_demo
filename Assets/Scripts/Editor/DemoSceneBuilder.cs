@@ -13,7 +13,7 @@ using UnityEngine.UI;
 // Uso: menú  Tools → The House Special → Montar escena demo
 // Crea (o reemplaza) la escena Assets/Escenas/Dia_3 con: sprites básicos, los 9 productos,
 // los prefabs (cliente, producto en barra, botón del TPV) y la escena Dia_3.
-// No toca tus otras escenas ni carpetas.
+// No toca las demás escenas ni carpetas.
 public static partial class DemoSceneBuilder
 {
     // Dónde va cada cosa (ver Tools → The House Special → Ordenar: carpetas del proyecto)
@@ -100,7 +100,7 @@ public static partial class DemoSceneBuilder
             EditorUtility.ClearProgressBar();
             Debug.LogException(e);
             EditorUtility.DisplayDialog("Error al montar la escena",
-                "Algo ha fallado. Copia el error rojo de la Console y pásaselo a Claude.\n\n" + e.Message, "Vale");
+                "Algo ha fallado. El error completo está en la Console.\n\n" + e.Message, "Vale");
         }
     }
 
@@ -108,7 +108,7 @@ public static partial class DemoSceneBuilder
 
     private static void PrepareFolders()
     {
-        // Ya no se borra ninguna carpeta: solo se crean si faltan (los archivos se sobrescriben)
+        // No se borra ninguna carpeta: solo se crean si faltan (los archivos se sobrescriben)
         foreach (string f in new[] { SpritesFolder, DataFolder, PrefabsFolder, "Assets/Escenas" })
             EnsureAssetFolder(f);
     }
@@ -331,6 +331,7 @@ public static partial class DemoSceneBuilder
         Set(customer, "selectionMarker", selected);
         Set(customer, "alertLabel", alertLabel);
         Set(customer, "orderLabel", orderLabel);
+        AddCommentBubble(go, customer); // bocadillo de comentario aleatorio (DemoSceneBuilder.Comentarios)
         return customer;
     }
 

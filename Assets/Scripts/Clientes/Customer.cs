@@ -38,6 +38,12 @@ public class Customer : MonoBehaviour
     [Tooltip("Texto opcional con el nombre del producto pedido")]
     [SerializeField] private TMP_Text orderLabel;
 
+    [Header("Comentario aleatorio (lo enseña el CustomerCommentManager)")]
+    [Tooltip("Bocadillo del comentario. No es clicable, para que no tape los clics en mesas y avisos.")]
+    [SerializeField] private GameObject commentBubble;
+    [Tooltip("Texto del comentario")]
+    [SerializeField] private TMP_Text commentLabel;
+
     [Tooltip("Marca que se ve cuando el jugador selecciona al grupo en la cola")]
     [SerializeField] private GameObject selectionMarker;
 
@@ -66,12 +72,16 @@ public class Customer : MonoBehaviour
     // Si es true, camina aunque el tiempo del juego esté congelado (cuando la camarera se lo lleva)
     public bool IgnoreFreeze { get; set; }
 
+    public bool IsCommentVisible => commentBubble != null && commentBubble.activeSelf;
+
     private void Awake()
     {
         // Los bocadillos también se pueden clicar: cuentan como clic en el cliente,
         // y el ClickManager convierte "clic en cliente sentado" en "clic en su mesa".
         MakeClickable(alertBubble);
         MakeClickable(orderBubble);
+
+        if (commentBubble != null) commentBubble.SetActive(false);
     }
 
     // Pone un collider a cada dibujo del bocadillo (fondo e icono) para que el ratón lo detecte
@@ -110,6 +120,7 @@ public class Customer : MonoBehaviour
         if (faceRenderer != null) faceRenderer.gameObject.SetActive(false);
         Raise(alertBubble, alertBubbleRaise);
         Raise(orderBubble, orderBubbleRaise);
+        Raise(commentBubble, alertBubbleRaise);
     }
 
     private static void Raise(GameObject bubble, float amount)
@@ -154,6 +165,20 @@ public class Customer : MonoBehaviour
         if (orderIconRenderer == null) return;
         if (item.icon != null) orderIconRenderer.sprite = item.icon;
         orderIconRenderer.color = item.placeholderColor;
+    }
+
+    // Enseña un comentario encima del cliente. Devuelve false si el prefab no tiene bocadillo de comentario.
+    public bool ShowComment(string message)
+    {
+        if (commentBubble == null || commentLabel == null || string.IsNullOrWhiteSpace(message)) return false;
+        commentLabel.text = message;
+        commentBubble.SetActive(true);
+        return true;
+    }
+
+    public void HideComment()
+    {
+        if (commentBubble != null) commentBubble.SetActive(false);
     }
 
     public void SetSelected(bool selected)

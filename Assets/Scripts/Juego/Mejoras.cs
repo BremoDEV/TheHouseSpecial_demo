@@ -6,7 +6,7 @@ using UnityEngine;
 // - UpgradeCatalog: el archivo con las 6 mejoras (Assets/Resources/Mejoras.asset): nombres, textos,
 //   dibujos, precios por nivel y los valores de cada efecto. Todo editable en el Inspector.
 // - RunState: lo que dura una partida (del día 1 al 5): ahorros y nivel de cada mejora.
-//   Si te despiden o vuelves al menú, se borra (empiezas sin mejoras).
+//   Se borra al ser despedida o al volver al menú (la partida empieza sin mejoras).
 // - Upgrades: atajos para que el juego pregunte "¿cuánto vale ahora X?" (bandeja, velocidad…).
 // ===================================================================================
 

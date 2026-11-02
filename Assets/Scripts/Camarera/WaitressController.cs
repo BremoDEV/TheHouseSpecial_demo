@@ -6,7 +6,7 @@ using UnityEngine;
 // Funciona con una COLA DE ACCIONES: cada clic se apunta y la camarera las hace una detrás de otra
 // (p. ej. clic en una mesa, luego en la TPV y luego en otra mesa = va a las tres en orden).
 // Como máximo hay "maxQueuedActions" acciones a la vez (contando la que está haciendo).
-// Encima de cada destino pendiente aparece su número (1, 2, 3).
+// Los números encima de los destinos pendientes (1, 2, 3) solo salen con 'showQueueNumbers' activado.
 // Clic derecho = cancelar la cola (se para donde esté).
 // Si hay una WalkGrid en la escena, rodea los obstáculos siguiendo un camino de puntos.
 [RequireComponent(typeof(WaitressHands))]
@@ -153,7 +153,7 @@ public class WaitressController : MonoBehaviour
             current = next;
             hasCurrent = true;
             if (next.IsInteraction) SetDestination(next.target.InteractionPosition, true);
-            else SetDestination(next.point, false); // si clicas en un obstáculo, va al punto libre más cercano
+            else SetDestination(next.point, false); // si el clic cae en un obstáculo, va al punto libre más cercano
 
             // Ya estaba justo ahí: actuamos sin caminar
             if (!isMoving) OnArrived();

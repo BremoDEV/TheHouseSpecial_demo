@@ -8,8 +8,8 @@ using UnityEngine.UI;
 // - Los botones de productos (se crean solos a partir de la carta) AÑADEN a una comanda.
 // - "Pedir" manda toda la comanda a cocina y cierra el panel.
 // - "Borrar" vacía la comanda. "Cuenta" saca una cuenta. "X" cierra sin pedir.
-// Pon este script en el Canvas (que siempre está activo) y asigna el panel en "Root".
-// Si no se asigna el botón "Pedir", funciona como antes: cada producto se pide al pulsarlo.
+// Va en el Canvas (que siempre está activo); el panel se asigna en "Root".
+// Sin botón "Pedir" asignado, cada producto se pide directamente al pulsarlo.
 public class TpvPanel : MonoBehaviour
 {
     [Header("Referencias de la UI")]
@@ -252,7 +252,7 @@ public class TpvPanel : MonoBehaviour
     {
         if (selection.Count == 0)
         {
-            // Solo has sacado la cuenta: "Pedir" cierra la TPV
+            // Solo se ha sacado la cuenta: "Pedir" cierra la TPV
             if (billTaken) { Close(); return; }
             GameMessages.Show("La comanda está vacía: elige primero los productos");
             return;

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 // Ajustes de dificultad COMPARTIDOS por los 5 días (un solo archivo: Assets/Datos/Dificultad.asset).
-// Cambias un número aquí y afecta a todos los días a la vez.
+// Un mismo valor afecta a todos los días a la vez.
 // Lo que cambia de un día a otro sale solo del número de día y de las mesas que tenga la escena.
 [CreateAssetMenu(fileName = "Dificultad", menuName = "The House Special/Ajustes de dificultad")]
 public class DifficultySettings : ScriptableObject
@@ -43,7 +43,7 @@ public class DifficultySettings : ScriptableObject
              "a partir del día 3 lo normal es llevarse a 1 o 2 clientes al trastero")]
     public float[] rageByDay = { 0.6f, 0.8f, 1f, 1.1f, 1.2f };
     [Tooltip("La ira que dan los clientes de la COLA (enfadarse esperando o irse) se multiplica por esto. " +
-             "0.5 = la mitad: sigue molestando, pero no es culpa tuya que no haya mesas")]
+             "0.5 = la mitad: sigue molestando, pero que no haya mesas no depende del jugador")]
     [Range(0f, 1f)] public float queueRageScale = 0.5f;
 
     // Multiplicador del tiempo entre grupos según las mesas (más mesas = menos tiempo)

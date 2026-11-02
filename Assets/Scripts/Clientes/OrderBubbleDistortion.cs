@@ -9,7 +9,7 @@ using UnityEngine;
 //   1) Desde el 50%: el bocadillo se tambalea y tiembla (cada vez más).
 //   2) Desde el 75%: el color del icono se desvía (cuesta distinguir productos parecidos).
 //   3) Desde el 90%: de vez en cuando, durante un instante, el icono muestra OTRO producto.
-//      El pedido real no cambia: es la camarera la que "ve mal". Si te fijas, lo ves bien.
+//      El pedido real no cambia: es la camarera la que "ve mal". Fijándose bien, se distingue.
 public class OrderBubbleDistortion : MonoBehaviour
 {
     [Tooltip("El icono del producto dentro del bocadillo (OrderIcon)")]

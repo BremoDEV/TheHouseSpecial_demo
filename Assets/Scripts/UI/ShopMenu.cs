@@ -4,8 +4,8 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // La tienda entre días, como la carta de un restaurante (tríptico).
-// Se gasta el dinero que te has pasado del objetivo (se acumula de un día a otro).
-// Las mejoras duran hasta que te despiden o acabas la semana.
+// Se gasta el dinero que supera el objetivo de cada día (se acumula de un día a otro).
+// Las mejoras duran hasta el despido o hasta el final de la semana.
 // Para probar en el editor: F9 da 100 € de ahorros.
 public class ShopMenu : MonoBehaviour
 {

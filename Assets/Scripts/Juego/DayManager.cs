@@ -9,9 +9,9 @@ using UnityEngine.UI;
 // - Al llegar la hora de cierre: no entra nadie más, los de la cola se van
 //   y los que ya están sentados terminan (tras la bebida piden directamente la cuenta).
 // - Cuando no queda nadie, sale el TICKET de fin de día con las estadísticas:
-//     · Si llegas al mínimo: "¡Has sobrevivido al día!" y botón Siguiente día
+//     · Si se llega al mínimo: "¡Has sobrevivido al día!" y botón Siguiente día
 //       (en el último día: "¡Has sobrevivido a la semana!" y botón Menú principal).
-//     · Si no llegas: sello de DESPEDIDA y se vuelve a empezar desde el día 1 (o al menú).
+//     · Si no se llega: sello de DESPEDIDA y se vuelve a empezar desde el día 1 (o al menú).
 public class DayManager : MonoBehaviour
 {
     public static DayManager Instance { get; private set; }
@@ -88,7 +88,7 @@ public class DayManager : MonoBehaviour
         ? difficulty.RageDayMultiplier(dayNumber) * (1f + difficulty.rageIncreasePerHour * HoursElapsed)
         : 1f;
 
-    // La ira que viene de la cola (no es culpa tuya que no haya mesas): reducida
+    // La ira que viene de la cola (que no haya mesas no depende del jugador): reducida
     public float QueueRageScale => difficulty != null ? difficulty.queueRageScale : 1f;
 
     private float elapsed;
@@ -169,7 +169,7 @@ public class DayManager : MonoBehaviour
         float goal = MoneyManager.Instance != null ? MoneyManager.Instance.DailyGoal : 0f;
         success = money >= goal;
 
-        // Lo que te pasas del objetivo va a la hucha de la tienda (si no es el último día)
+        // Lo que supera el objetivo va a la hucha de la tienda (si no es el último día)
         if (success && !IsLastDay) RunState.AddSavings(money - goal);
 
         Debug.Log($"Fin del día {dayNumber}. Dinero: {money:0} / {goal:0}. " +

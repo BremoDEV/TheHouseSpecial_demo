@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 // Segunda parte del montador: el TUTORIAL y el MENÚ PRINCIPAL.
 // Uso: menú  Tools → The House Special → Montar tutorial y menú principal
-// - Copia la escena Dia_3 tal y como la tengas guardada (con tus cambios) a Assets/Escenas/Tutorial,
+// - Copia la escena Dia_3 tal y como esté guardada a Assets/Escenas/Tutorial,
 //   le deja una sola mesa, apaga el reloj y añade el TutorialManager con su panel, botones y flecha.
 // - Crea Assets/Escenas/MenuPrincipal con los botones Tutorial / Jugar / Salir.
 // - Ordena las escenas en Build Profiles: Menú → Tutorial → Demo.
@@ -61,7 +61,7 @@ public static partial class DemoSceneBuilder
             EditorUtility.ClearProgressBar();
             Debug.LogException(e);
             EditorUtility.DisplayDialog("Error al montar el tutorial",
-                "Algo ha fallado. Copia el error rojo de la Console y pásaselo a Claude.\n\n" + e.Message, "Vale");
+                "Algo ha fallado. El error completo está en la Console.\n\n" + e.Message, "Vale");
         }
     }
 

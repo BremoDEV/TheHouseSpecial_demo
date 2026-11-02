@@ -22,7 +22,7 @@ public class StoreroomManager : MonoBehaviour
     [Header("Llevarse al cliente (editable por diseño)")]
     [Tooltip("Segundos que dura la pantalla en negro")]
     [SerializeField] private float blackoutDuration = 2.5f;
-    [Tooltip("Ira con la que te quedas después de 'encargarte' del cliente")]
+    [Tooltip("Ira con la que se queda la camarera después de llevarse al cliente")]
     [SerializeField] private float rageAfterKill = 0f;
     [Tooltip("Separación de los clientes detrás de la camarera mientras los lleva")]
     [SerializeField] private Vector2 followSpacing = new Vector2(-0.6f, 0f);
@@ -75,7 +75,7 @@ public class StoreroomManager : MonoBehaviour
         {
             if (RageMeter.Instance.Current > 0f) restHadRage = true;
             RageMeter.Instance.ReduceRage(restRagePerSecond * Time.deltaTime);
-            // Antes salía al momento si entraba con la ira a 0 (parecía que no te dejaba entrar)
+            // Solo sale sola si tenía ira que bajar; si entra con la ira a 0, se queda hasta el siguiente clic
             if (autoExitWhenCalm && restHadRage && RageMeter.Instance.Current <= 0f) StopRest();
         }
     }

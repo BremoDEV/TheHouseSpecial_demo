@@ -4,9 +4,9 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-// Hace la build para pasar el juego a otra gente, sin tener que elegir carpetas.
+// Genera la build de Windows sin tener que elegir carpetas.
 // Uso: menú  Tools → The House Special → Build: Windows
-// Sale en la carpeta Builds/Windows del proyecto (al lado de Assets). Para pasarla, comprime esa carpeta ENTERA en un .zip.
+// Sale en la carpeta Builds/Windows del proyecto (al lado de Assets). La build es la carpeta entera (ejecutable + datos).
 public static class BuildHelper
 {
     private const string ExeName = "TheHouseSpecial.exe";
@@ -42,8 +42,7 @@ public static class BuildHelper
             EditorUtility.DisplayDialog("¡Build lista!",
                 $"Hecha en {folder}\n({summary.totalSize / (1024 * 1024)} MB, {summary.totalTime.TotalSeconds:0} s)\n\n" +
                 "Escenas: " + string.Join(", ", scenes.Select(Path.GetFileNameWithoutExtension)) + "\n\n" +
-                "Para pasarla: comprime la carpeta Windows ENTERA en un .zip. " +
-                "Tus amigos la descomprimen y abren " + ExeName + ".", "Vale");
+                "El juego se abre con " + ExeName + " (la carpeta Windows tiene que ir entera, con todos sus archivos).", "Vale");
             EditorUtility.RevealInFinder(Path.Combine(folder, ExeName));
         }
         else

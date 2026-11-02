@@ -5316,6 +5316,82 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &992361993
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 992361995}
+  - component: {fileID: 992361994}
+  m_Layer: 0
+  m_Name: ComentariosClientes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &992361994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 992361993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ddbc85e1715f5c4baee3dca342bb9fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CustomerCommentManager
+  comments:
+  - text: "\xA1Qu\xE9 hambre tengo!"
+    type: 1
+  - text: "Espero que la comida est\xE9 buena."
+    type: 0
+  - text: "\xBFCu\xE1nto falta?"
+    type: 2
+  - text: "\xBFNos atienden pronto?"
+    type: 2
+  - text: Este sitio tiene personalidad.
+    type: 0
+  - text: "\xA1Todo huele incre\xEDble!"
+    type: 1
+  - text: "\xBFPuedes venir un segundo?"
+    type: 0
+  - text: Bueno, seguimos esperando...
+    type: 2
+  - text: "\xBFEsto viene as\xED o es una sorpresa?"
+    type: 2
+  - text: Menos mal que no cocino yo.
+    type: 0
+  - text: "\xBFSiempre hay tanto ruido?"
+    type: 2
+  - text: "\xBFPodemos pedir ya?"
+    type: 2
+  - text: La carta parece un acertijo.
+    type: 0
+  - text: "\xBFMe est\xE1s ignorando o es parte del servicio?"
+    type: 3
+  minInterval: 5
+  maxInterval: 10
+  visibleDuration: 3
+--- !u!4 &992361995
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 992361993}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1022176785
 GameObject:
   m_ObjectHideFlags: 0
@@ -13889,3 +13965,4 @@ SceneRoots:
   - {fileID: 1026599034}
   - {fileID: 616492901}
   - {fileID: 1912813055}
+  - {fileID: 992361995}

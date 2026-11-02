@@ -10,7 +10,7 @@ public enum TableState
 // Una mesa del restaurante (máximo 2 personas).
 // - Libre para la cola = no hay nadie sentado (aunque esté sucia).
 // - Solo se puede SENTAR a gente si está vacía y limpia.
-// - Recoger una mesa sucia te pone los platos sucios en una mano.
+// - Al recoger una mesa sucia, la camarera lleva los platos sucios en una mano.
 public class Table : Interactable
 {
     [Header("Mesa")]

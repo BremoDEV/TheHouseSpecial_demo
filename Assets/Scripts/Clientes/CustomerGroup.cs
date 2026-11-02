@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // IMPORTANTE: el orden de este enum importa (se usa para saber si están "sentados").
-// Si añadís estados nuevos, ponedlos al final.
+// Los estados nuevos van siempre al final.
 public enum GroupState
 {
     InQueue,            // esperando en la cola                       (paciencia)
     WalkingToTable,     // caminando a la mesa
     Seated,             // recién sentados, pensando
     WantsToOrderDrinks, // '!' para pedir bebida                      (paciencia)
-    WaitingForDrinks,   // ya has tomado nota, esperan las bebidas    (paciencia)
+    WaitingForDrinks,   // ya se ha tomado nota, esperan las bebidas    (paciencia)
     Drinking,           // bebiendo
     WantsMenu,          // piden la carta                             (paciencia)
     ChoosingFood,       // mirando la carta
@@ -112,6 +112,13 @@ public class CustomerGroup : MonoBehaviour
 
     // El primer cliente del grupo (para señalarlo con la flecha del tutorial)
     public Transform Anchor => Size > 0 ? members[0].transform : transform;
+
+    // Un miembro activo del grupo (null si el índice no existe). Lo usa el CustomerCommentManager.
+    public Customer GetMember(int index)
+    {
+        if (index < 0 || index >= Size) return null;
+        return members[index];
+    }
 
     // Posición del grupo (la del primer cliente)
     public Vector2 Position =>
@@ -342,7 +349,7 @@ public class CustomerGroup : MonoBehaviour
     // Cambia de fase: aquí se decide qué paciencia tiene, qué aviso enseña, etc.
     private void EnterState(GroupState newState)
     {
-        // Estadística: cuánta paciencia le quedaba cuando le has atendido (pasa a la siguiente fase)
+        // Estadística: cuánta paciencia le quedaba cuando se le atiende (pasa a la siguiente fase)
         if (draining && newState != GroupState.Leaving && newState != GroupState.BeingTaken)
             DayStats.Patience(PatienceNormalized);
 

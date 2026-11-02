@@ -35,7 +35,7 @@ public class ShopCard : MonoBehaviour
 
         if (icon != null)
         {
-            // Enseña el dibujo del nivel que vas a comprar (o el último si ya está al máximo)
+            // Enseña el dibujo del siguiente nivel que se puede comprar (o el último si ya está al máximo)
             Sprite s = def.IconFor(maxed ? level : level + 1);
             icon.sprite = s;
             icon.enabled = s != null;

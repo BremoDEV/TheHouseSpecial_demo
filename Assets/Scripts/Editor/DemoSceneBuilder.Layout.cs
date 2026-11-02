@@ -3,15 +3,15 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-// Distribución del restaurante (versión 2, según el esquema del equipo):
+// Distribución del restaurante (versión 2):
 // - Cola FUERA, a la izquierda. Se entra por el hueco de la pared izquierda.
 // - Arriba: 3 mesas pegadas a la pared (al banco). Abajo: 2 mesas.
 // - Arriba a la derecha: puerta del trastero, TPV y cartas.
 // - Derecha: barra en L con la cocina detrás. Parte LARGA (vertical) = donde sale la comida.
 //   Parte CORTA (horizontal) = sucios y sobras. Cubiertos en la esquina de la L.
 // Uso: menú  Tools → The House Special → Reorganizar restaurante (esquema nuevo)
-// Mueve los objetos de la escena ABIERTA (no borra tus cambios de textos ni de valores).
-// Todas las posiciones están aquí arriba para poder retocarlas fácilmente.
+// Mueve los objetos de la escena ABIERTA (no toca los textos ni los valores).
+// Todas las posiciones están definidas como constantes aquí arriba.
 public static partial class DemoSceneBuilder
 {
     // ---------- Zonas (en unidades del mundo; la cámara ve de x -10.67 a 10.67 y de y -6 a 6)
@@ -171,7 +171,7 @@ public static partial class DemoSceneBuilder
         var waitress = GameObject.Find("Waitress");
         if (waitress != null) Move(waitress.transform, new Vector3(0f, 0f, 0f));
 
-        // --- Carteles (se mueven, no se cambia el texto que hayáis puesto) ---
+        // --- Carteles (solo se mueven, el texto no se toca) ---
         MoveLabel("COLA", new Vector3(-9.3f, 2.1f, 0f), 4f); // por encima de la cabeza del primero de la cola
         MoveLabel("CARTAS", new Vector3(6.05f, -5.5f, 0f), 2f);
         MoveLabel("TPV", new Vector3(8.6f, 4.65f, 0f), 2f);

@@ -10,14 +10,14 @@ using UnityEngine.UI;
 // Cuarta parte del montador: la TIENDA DE MEJORAS.
 // Uso: menú  Tools → The House Special → Montar tienda de mejoras
 // - Crea (o completa) el catálogo Assets/Resources/Mejoras.asset con las 6 mejoras del documento de diseño
-//   (precios provisionales). Si ya existe, NO se pisan tus precios ni tus textos: solo se rellenan dibujos que falten.
+//   (precios provisionales). Si ya existe, NO se sobrescriben los precios ni los textos: solo se rellenan dibujos que falten.
 // - Rehace la escena Assets/Escenas/Tienda (el tríptico con las 6 mejoras).
 // - En los 5 días añade (si no están): la tele en la pared y el botón de la TPV portátil en el HUD.
 // - Añade la tienda a Build Profiles.
 public static partial class DemoSceneBuilder
 {
     private const string ShopScenePath = ScenesFolder + "/Tienda.unity";
-    // Dibujos PROVISIONALES de las mejoras (sacados de Pinterest y uno hecho por Claude) hasta que esté el arte del equipo
+    // Dibujos PROVISIONALES de las mejoras, hasta tener el arte definitivo
     private const string UpgradesArtFolder = "Assets/Arte/Provisional/Mejoras";
     private const string OldUpgradesArtFolder = "Assets/Arte/Mejoras";
     private const string UpgradeCatalogPath = "Assets/Resources/Mejoras.asset";
@@ -102,7 +102,7 @@ public static partial class DemoSceneBuilder
         };
         foreach (UpgradeDef def in catalog.upgrades)
         {
-            // Textos antiguos del mostrador (antes de que limitara los pedidos): se actualizan
+            // Textos antiguos del mostrador (de antes del límite de pedidos): se actualizan
             if (def != null && def.id == UpgradeId.Mostrador && def.levelEffects != null && def.levelEffects.Length == 2
                 && def.levelEffects[0] == "4 huecos")
             {

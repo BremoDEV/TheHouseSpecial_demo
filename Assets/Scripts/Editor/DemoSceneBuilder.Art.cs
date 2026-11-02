@@ -10,8 +10,8 @@ using UnityEngine;
 // - Platos especiales: Pájaro azul → Pollo con plumas azules; Loba → Brocheta de la casa.
 // - Mesas: plato limpio y plato sucio. Camarera: pila de platos sucios al recoger una mesa.
 // - Clientes con dibujo (Assets/Arte/PJ): Pájaro azul, Loba, Hámster y Zorra. Camarera: Haiki.
-// Los dibujos se buscan por nombre en Assets/Arte y TODAS sus subcarpetas (da igual cómo las ordenéis).
-// Para añadir más arte: mete el PNG en Assets/Arte y añade una línea en la lista 'Products' de abajo.
+// Los dibujos se buscan por nombre en Assets/Arte y TODAS sus subcarpetas.
+// Cada producto con dibujo es una línea de la lista 'Products' de abajo.
 public static partial class DemoSceneBuilder
 {
     private const string ArtFolder = "Assets/Arte";
@@ -96,7 +96,7 @@ public static partial class DemoSceneBuilder
         {
             string path = AssetDatabase.GUIDToAssetPath(guid);
             if (path.StartsWith(ArtFolder + "/Menu/") || path.StartsWith(ArtFolder + "/UI/") ||
-                path.StartsWith(ArtFolder + "/Generados/")) continue; // formas básicas: no son pixel art del equipo
+                path.StartsWith(ArtFolder + "/Generados/")) continue; // formas básicas: no son pixel art
             ConfigurePixelArt(path);
         }
 
