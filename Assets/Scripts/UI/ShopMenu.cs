@@ -20,7 +20,7 @@ public class ShopMenu : MonoBehaviour
         Time.timeScale = 1f;
         foreach (ShopCard c in cards) if (c != null) c.Init(this);
         if (continueButton != null) continueButton.onClick.AddListener(Continue);
-        if (continueLabel != null) continueLabel.text = $"Empezar el día {RunState.NextDayNumber}";
+        if (continueLabel != null) continueLabel.text = "Cerrar el restaurante";
         if (dayText != null) dayText.text = $"Antes del día {RunState.NextDayNumber}";
         RefreshAll();
     }
@@ -54,8 +54,14 @@ public class ShopMenu : MonoBehaviour
         foreach (ShopCard c in cards) if (c != null) c.Refresh();
     }
 
+    // Después de la tienda llama el psiquiatra; si la escena no está en la build, se va directo al día siguiente
     private void Continue()
     {
+        if (Application.CanStreamedLevelBeLoaded(PhoneCall.SceneName))
+        {
+            SceneManager.LoadScene(PhoneCall.SceneName);
+            return;
+        }
         SceneManager.LoadScene(string.IsNullOrEmpty(RunState.NextDayScene) ? "Dia_1" : RunState.NextDayScene);
     }
 }

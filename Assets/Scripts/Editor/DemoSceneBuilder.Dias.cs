@@ -294,6 +294,7 @@ public static partial class DemoSceneBuilder
         var ordered = new List<string> { MenuScenePath, TutorialScenePath };
         for (int d = 1; d <= DayCount; d++) ordered.Add(DayScenePath(d));
         ordered.Add(ScenesFolder + "/Tienda.unity"); // la tienda entre días
+        ordered.Add(ScenesFolder + "/Llamada.unity"); // la llamada del psiquiatra, después de la tienda
 
         var scenes = new List<EditorBuildSettingsScene>();
         foreach (string p in ordered)

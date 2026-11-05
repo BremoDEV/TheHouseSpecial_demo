@@ -5,7 +5,7 @@ using UnityEngine;
 // TIENDA DE MEJORAS
 // - UpgradeCatalog: el archivo con las 6 mejoras (Assets/Resources/Mejoras.asset): nombres, textos,
 //   dibujos, precios por nivel y los valores de cada efecto. Todo editable en el Inspector.
-// - RunState: lo que dura una partida (del día 1 al 5): ahorros y nivel de cada mejora.
+// - RunState: lo que dura una partida (del día 1 al 5): ahorros, víctimas y nivel de cada mejora.
 //   Se borra al ser despedida o al volver al menú (la partida empieza sin mejoras).
 // - Upgrades: atajos para que el juego pregunte "¿cuánto vale ahora X?" (bandeja, velocidad…).
 // ===================================================================================
@@ -50,6 +50,10 @@ public static class RunState
 
     public static float Savings { get; private set; }
 
+    // Víctimas en lo que va de partida: hacen más difícil la llamada del psiquiatra
+    public static int Kills { get; private set; }
+    public static void AddKill() => Kills++;
+
     // A qué día se va al salir de la tienda
     public static string NextDayScene { get; set; } = "Dia_1";
     public static int NextDayNumber { get; set; } = 1;
@@ -79,6 +83,7 @@ public static class RunState
     public static void Reset()
     {
         Savings = 0f;
+        Kills = 0;
         for (int i = 0; i < levels.Length; i++) levels[i] = 0;
         NextDayScene = "Dia_1";
         NextDayNumber = 1;

@@ -129,6 +129,7 @@ public class DayManager : MonoBehaviour
     public void RegisterKill()
     {
         KillsToday++;
+        RunState.AddKill();
     }
 
     private void Close()
@@ -252,7 +253,9 @@ public class DayManager : MonoBehaviour
             RunState.NextDayScene = nextDayScene;
             RunState.NextDayNumber = dayNumber + 1;
             bool hasShop = !string.IsNullOrEmpty(shopScene) && Application.CanStreamedLevelBeLoaded(shopScene);
-            SceneManager.LoadScene(hasShop ? shopScene : nextDayScene);
+            // Sin tienda se pasa directamente a la llamada del psiquiatra (y de ahí al día siguiente)
+            bool hasCall = Application.CanStreamedLevelBeLoaded(PhoneCall.SceneName);
+            SceneManager.LoadScene(hasShop ? shopScene : hasCall ? PhoneCall.SceneName : nextDayScene);
         }
     }
 
